@@ -1,0 +1,49 @@
+﻿{
+  "retail": {
+    "label": "Retail Store",
+    "weights": {
+      "demand": 0.30,
+      "accessibility": 0.15,
+      "competition": 0.20,
+      "complementarity": 0.20,
+      "landuse": 0.10,
+      "risk": 0.05
+    },
+    "params": {
+      "competition_optimum": 3.0,
+      "competition_sigma": 2.0,
+      "walk_half_life_m": 600,
+      "drive_half_life_m": 3000
+    }
+  },
+  "warehouse": {
+    "label": "Warehouse",
+    "weights": {
+      "demand": 0.05,
+      "accessibility": 0.45,
+      "competition": 0.05,
+      "complementarity": 0.05,
+      "landuse": 0.25,
+      "risk": 0.15
+    },
+    "params": {
+      "drive_half_life_m": 8000,
+      "highway_weight": 3.0
+    }
+  },
+  "ev_charging": {
+    "label": "EV Charging",
+    "weights": {
+      "demand": 0.25,
+      "accessibility": 0.30,
+      "competition": 0.25,
+      "complementarity": 0.05,
+      "landuse": 0.10,
+      "risk": 0.05
+    },
+    "params": {
+      "competition_optimum": 1.0,
+      "competition_sigma": 1.5
+    }
+  }
+}

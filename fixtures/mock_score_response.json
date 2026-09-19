@@ -1,0 +1,72 @@
+﻿{
+  "h3": "892a30654c7ffff",
+  "score": 78.4,
+  "grade": "B+",
+  "preset": "retail",
+  "lat": 30.2712,
+  "lon": -97.7431,
+  "factors": [
+    {
+      "key": "demand",
+      "label": "Demand",
+      "raw": 0.82,
+      "weight": 0.30,
+      "contribution": 24.6,
+      "explanation": "Dense residential catchment: 18.4k residents within 1 km, median income $72k (metro p78)."
+    },
+    {
+      "key": "accessibility",
+      "label": "Accessibility",
+      "raw": 0.71,
+      "weight": 0.15,
+      "contribution": 10.65,
+      "explanation": "High road density, 320 m to nearest highway on-ramp, 4 transit stops within 800 m."
+    },
+    {
+      "key": "competition",
+      "label": "Competition",
+      "raw": 0.61,
+      "weight": 0.20,
+      "contribution": 12.2,
+      "explanation": "6 competitors within 1 km — above the optimal 3. Market is served but not saturated."
+    },
+    {
+      "key": "complementarity",
+      "label": "Complementarity",
+      "raw": 0.74,
+      "weight": 0.20,
+      "contribution": 14.8,
+      "explanation": "3 anchor tenants within 1 km (grocery, pharmacy, gym) driving co-located foot traffic."
+    },
+    {
+      "key": "landuse",
+      "label": "Land Use",
+      "raw": 0.85,
+      "weight": 0.10,
+      "contribution": 8.5,
+      "explanation": "Zoned CS (General Commercial Services) — high suitability for retail."
+    },
+    {
+      "key": "risk",
+      "label": "Risk",
+      "raw": 0.35,
+      "weight": 0.05,
+      "contribution": 1.75,
+      "explanation": "⚠ Site intersects FEMA Zone AE (1% annual flood). Score reduced 65%."
+    }
+  ],
+  "flags": [
+    {
+      "type": "flood",
+      "severity": "high",
+      "text": "Inside FEMA AE zone — 1% annual chance flood. Penalty ×0.35 applied."
+    }
+  ],
+  "archetype": "Suburban Growth",
+  "neighbors": {
+    "hotspot_z": 2.31
+  },
+  "penalties_applied": [
+    { "reason": "FEMA SFHA AE zone", "multiplier": 0.35 }
+  ]
+}

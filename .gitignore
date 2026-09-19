@@ -1,0 +1,36 @@
+﻿# Python
+__pycache__/
+.venv/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+dist/
+.vite/
+.next/
+
+# Docker / data volumes
+pipeline/data/pgdata/
+
+# Large data files (keep .gitkeep)
+*.pbf
+*.osm.pbf
+*.tif
+*.tiff
+*.shp
+*.dbf
+*.prj
+*.pmtiles
+
+# Secrets
+.env
+
+# OS
+.DS_Store
+Thumbs.db
