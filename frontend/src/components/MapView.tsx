@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import DeckGL from '@deck.gl/react';
-import { ScatterplotLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { Protocol } from 'pmtiles';
 import { createHexLayer } from '../layers/hexLayer';
 import { addRoadLayer, removeRoadLayer } from '../layers/roadLayer';
 import { createPoiLayers } from '../layers/poiLayer';
 import { addFloodLayer, removeFloodLayer } from '../layers/floodLayer';
 import { createTransitLayer } from '../layers/transitLayer';
+import { createHotspotLayer } from '../layers/hotspotLayer';
+import { addIsoLayers, removeIsoLayers } from '../layers/isoLayer';
+import DrawTool from './DrawTool';
+import { useAppStore } from '../store/useAppStore';
 
 export interface MapViewProps {
   activeLayers: string[];
@@ -21,6 +26,15 @@ interface HoveredCellInfo {
   score: number;
   x: number;
   y: number;
+}
+
+let protocolRegistered = false;
+function ensurePmtilesProtocol() {
+  if (!protocolRegistered) {
+    const protocol = new Protocol();
+    maplibregl.addProtocol('pmtiles', protocol.tile);
+    protocolRegistered = true;
+  }
 }
 
 const mapStyle: maplibregl.StyleSpecification = {
@@ -61,50 +75,100 @@ export default function MapView(props: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const onMapClickRef = useRef(props.onMapClick);
+  const onPolygonDrawRef = useRef(props.onPolygonDraw);
+
+  const { layerOpacity, drawnPolygon, setDrawnPolygon } = useAppStore();
 
   const [mapReady, setMapReady] = useState(false);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [scoresGeojson, setScoresGeojson] = useState<GeoJSON.FeatureCollection | null>(null);
   const [poiFeatures, setPoiFeatures] = useState<GeoJSON.Feature[]>([]);
   const [transitFeatures, setTransitFeatures] = useState<GeoJSON.Feature[]>([]);
+  const [hotspotFeatures, setHotspotFeatures] = useState<GeoJSON.Feature[]>([]);
   const [hoveredCell, setHoveredCell] = useState<HoveredCellInfo | null>(null);
+  const [pmtilesAvailable, setPmtilesAvailable] = useState(false);
+
+  // Drawing state
+  const [drawing, setDrawing] = useState(false);
+  const [drawVertices, setDrawVertices] = useState<[number, number][]>([]);
 
   useEffect(() => {
     onMapClickRef.current = props.onMapClick;
-  }, [props.onMapClick]);
+    onPolygonDrawRef.current = props.onPolygonDraw;
+  }, [props.onMapClick, props.onPolygonDraw]);
 
-  // Load mock data on mount
+  // Check PMTiles & load mock data on mount
   useEffect(() => {
+    ensurePmtilesProtocol();
+
+    // Guarded PMTiles check
+    fetch('/static/tiles/manifest.json')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((manifest) => {
+        if (
+          manifest &&
+          Array.isArray(manifest.layers) &&
+          manifest.layers.some((l: { id: string }) => l.id === 'h3_grid')
+        ) {
+          setPmtilesAvailable(true);
+        }
+      })
+      .catch(() => {
+        setPmtilesAvailable(false);
+      });
+
+    // Fallback or base scores
     fetch('/mock_scores.geojson')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json() as Promise<GeoJSON.FeatureCollection>;
       })
-      .then((data) => {
-        setScoresGeojson(data);
-      })
-      .catch((err: unknown) => {
-        console.warn('Failed to load /mock_scores.geojson:', err);
-      });
+      .then((data) => setScoresGeojson(data))
+      .catch((err: unknown) => console.warn('Failed to load /mock_scores.geojson:', err));
 
     fetch('/mock_pois.geojson')
       .then((res) => (res.ok ? (res.json() as Promise<GeoJSON.FeatureCollection>) : null))
       .then((data) => {
         if (data?.features) setPoiFeatures(data.features);
       })
-      .catch((err: unknown) => {
-        console.warn('Failed to load /mock_pois.geojson:', err);
-      });
+      .catch((err: unknown) => console.warn('Failed to load /mock_pois.geojson:', err));
 
     fetch('/mock_transit.geojson')
       .then((res) => (res.ok ? (res.json() as Promise<GeoJSON.FeatureCollection>) : null))
       .then((data) => {
         if (data?.features) setTransitFeatures(data.features);
       })
-      .catch((err: unknown) => {
-        console.warn('Failed to load /mock_transit.geojson:', err);
-      });
+      .catch((err: unknown) => console.warn('Failed to load /mock_transit.geojson:', err));
+
+    fetch('/mock_hotspots.geojson')
+      .then((res) => (res.ok ? (res.json() as Promise<GeoJSON.FeatureCollection>) : null))
+      .then((data) => {
+        if (data?.features) setHotspotFeatures(data.features);
+      })
+      .catch((err: unknown) => console.warn('Failed to load /mock_hotspots.geojson:', err));
   }, []);
+
+  // Handle map click (normal or drawing)
+  const handleCoordClick = (lat: number, lon: number) => {
+    if (drawing) {
+      const next: [number, number][] = [...drawVertices, [lon, lat]];
+      if (next.length >= 3) {
+        const ring: [number, number][] = [next[0], next[1], next[2], next[0]];
+        const poly: GeoJSON.Polygon = {
+          type: 'Polygon',
+          coordinates: [ring],
+        };
+        setDrawing(false);
+        setDrawVertices([]);
+        setDrawnPolygon(poly);
+        onPolygonDrawRef.current(poly);
+      } else {
+        setDrawVertices(next);
+      }
+    } else {
+      onMapClickRef.current(lat, lon);
+    }
+  };
 
   // Initialize MapLibre
   useEffect(() => {
@@ -137,7 +201,7 @@ export default function MapView(props: MapViewProps) {
     });
 
     map.on('click', (e: maplibregl.MapLayerMouseEvent) => {
-      onMapClickRef.current(e.lngLat.lat, e.lngLat.lng);
+      handleCoordClick(e.lngLat.lat, e.lngLat.lng);
     });
 
     return () => {
@@ -145,33 +209,69 @@ export default function MapView(props: MapViewProps) {
       mapRef.current = null;
       setMapReady(false);
     };
-  }, []);
+  }, [drawing, drawVertices]);
 
-  // Sync MapLibre vector/raster layers (roads, flood_zones)
+  // Sync MapLibre vector/raster layers (roads, flood_zones, isochrone, pmtiles)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
 
+    // Roads
     if (props.activeLayers.includes('roads')) {
       addRoadLayer(map);
     } else {
       removeRoadLayer(map);
     }
 
+    // Flood Zones
     if (props.activeLayers.includes('flood_zones')) {
       addFloodLayer(map);
     } else {
       removeFloodLayer(map);
     }
-  }, [props.activeLayers, mapReady]);
+
+    // Isochrone
+    if (props.activeLayers.includes('isochrone')) {
+      addIsoLayers(map, '/mock_iso.geojson');
+    } else {
+      removeIsoLayers(map);
+    }
+
+    // Real PMTiles layer swap if available
+    if (pmtilesAvailable && props.activeLayers.includes('h3_grid')) {
+      if (!map.getSource('pmtiles-h3')) {
+        map.addSource('pmtiles-h3', {
+          type: 'vector',
+          url: 'pmtiles:///static/tiles/h3_grid.pmtiles',
+        });
+      }
+      if (!map.getLayer('pmtiles-h3-layer')) {
+        map.addLayer({
+          id: 'pmtiles-h3-layer',
+          type: 'fill',
+          source: 'pmtiles-h3',
+          'source-layer': 'h3_grid',
+          paint: {
+            'fill-opacity': layerOpacity?.h3_grid ?? 0.75,
+            'fill-color': '#CCFF00',
+          },
+        });
+      }
+    } else {
+      if (map.getLayer('pmtiles-h3-layer')) map.removeLayer('pmtiles-h3-layer');
+      if (map.getSource('pmtiles-h3')) map.removeSource('pmtiles-h3');
+    }
+  }, [props.activeLayers, mapReady, pmtilesAvailable, layerOpacity]);
 
   // Build deck.gl layers
   const deckLayers = [];
 
-  if (props.activeLayers.includes('h3_grid') && scoresGeojson) {
+  // 1. H3 Hex Score layer (when not using PMTiles fallback)
+  if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && scoresGeojson) {
     deckLayers.push(
       createHexLayer({
         data: scoresGeojson,
+        opacity: layerOpacity?.h3_grid ?? 0.75,
         onHover: (info: unknown) => {
           const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
           if (pickInfo.object?.properties) {
@@ -189,21 +289,52 @@ export default function MapView(props: MapViewProps) {
         onClick: (info: unknown) => {
           const pickInfo = info as { coordinate?: [number, number] };
           if (pickInfo.coordinate) {
-            onMapClickRef.current(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+            handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
           }
         },
       })
     );
   }
 
+  // 2. Hotspot layer
+  if (props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
+    deckLayers.push(
+      createHotspotLayer({
+        data: hotspotFeatures,
+        opacity: 0.9,
+        onHover: (info: unknown) => {
+          const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
+          if (pickInfo.object?.properties) {
+            const p = pickInfo.object.properties as { h3: string; score: number; z: number };
+            setHoveredCell({
+              hex: p.h3,
+              score: p.score,
+              x: pickInfo.x ?? 0,
+              y: pickInfo.y ?? 0,
+            });
+          }
+        },
+        onClick: (info: unknown) => {
+          const pickInfo = info as { coordinate?: [number, number] };
+          if (pickInfo.coordinate) {
+            handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+          }
+        },
+      })
+    );
+  }
+
+  // 3. POIs layer
   if (props.activeLayers.includes('pois') && poiFeatures.length > 0) {
     deckLayers.push(...createPoiLayers(poiFeatures));
   }
 
+  // 4. Transit stops layer
   if (props.activeLayers.includes('transit_stops') && transitFeatures.length > 0) {
     deckLayers.push(createTransitLayer(transitFeatures));
   }
 
+  // 5. Candidate Pins
   if (props.candidatePins && props.candidatePins.length > 0) {
     deckLayers.push(
       new ScatterplotLayer({
@@ -224,9 +355,40 @@ export default function MapView(props: MapViewProps) {
     );
   }
 
+  // 6. Drawn search polygon visualization
+  if (drawnPolygon) {
+    deckLayers.push(
+      new GeoJsonLayer({
+        id: 'drawn-polygon-layer',
+        data: drawnPolygon,
+        pickable: false,
+        stroked: true,
+        filled: true,
+        getFillColor: [0, 229, 255, 45],
+        getLineColor: [0, 229, 255, 255],
+        getLineWidth: 2,
+        lineWidthMinPixels: 2,
+      })
+    );
+  }
+
+  // 7. Active drawing vertices
+  if (drawVertices.length > 0) {
+    deckLayers.push(
+      new ScatterplotLayer({
+        id: 'draw-vertices-layer',
+        data: drawVertices,
+        pickable: false,
+        getPosition: (d: unknown) => d as [number, number],
+        getFillColor: [0, 229, 255, 255],
+        radiusMinPixels: 5,
+      })
+    );
+  }
+
   return (
     <div className="relative w-full h-full">
-      {/* MapLibre container */}
+      {/* MapLibre canvas container */}
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* deck.gl overlay */}
@@ -239,7 +401,7 @@ export default function MapView(props: MapViewProps) {
           onClick={(info) => {
             const pickInfo = info as { coordinate?: [number, number] };
             if (pickInfo.coordinate) {
-              onMapClickRef.current(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
             }
           }}
         />
@@ -284,6 +446,22 @@ export default function MapView(props: MapViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Draw tool */}
+      <DrawTool
+        drawing={drawing}
+        onToggleDrawing={() => {
+          setDrawing((prev) => !prev);
+          setDrawVertices([]);
+        }}
+        hasPolygon={!!drawnPolygon}
+        onClearPolygon={() => {
+          setDrawnPolygon(null);
+          onPolygonDrawRef.current({ type: 'Polygon', coordinates: [] });
+        }}
+        vertexCount={drawVertices.length}
+        onPolygonDraw={props.onPolygonDraw}
+      />
 
       {/* Cyber-grid overlay & status tag */}
       <div className="cyber-grid absolute inset-0 pointer-events-none z-[1]" />
