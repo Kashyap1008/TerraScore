@@ -36,7 +36,7 @@ export const useAppStore = create<AppState>((set) => ({
   selectedSite: null,
   compareList: [],
   weights: WEIGHTS_BY_PRESET.retail,
-  layerOpacity: { h3_grid: 0.75, roads: 0.6, flood_zones: 0.35, pois: 1.0, transit_stops: 1.0, hotspots: 1.0, isochrone: 1.0 },
+  layerOpacity: { h3_grid: 0.50, roads: 0.6, flood_zones: 0.35, pois: 1.0, transit_stops: 1.0, hotspots: 1.0, isochrone: 1.0 },
   drawnPolygon: null,
   isochroneData: null,
   flyTo: null,

@@ -13,6 +13,7 @@ import { createHotspotLayer } from '../layers/hotspotLayer';
 import { addIsoLayers, removeIsoLayers } from '../layers/isoLayer';
 import DrawTool from './DrawTool';
 import { useAppStore } from '../store/useAppStore';
+import { AUSTIN_AREAS, type AustinArea } from '../config/austinAreas';
 
 export interface MapViewProps {
   activeLayers: string[];
@@ -20,6 +21,8 @@ export interface MapViewProps {
   onPolygonDraw: (geojson: GeoJSON.Polygon) => void;
   candidatePins: { lat: number; lon: number }[];
 }
+
+export type BasemapMode = 'satellite' | 'streets' | 'dark';
 
 interface HoveredCellInfo {
   hex: string;
@@ -37,30 +40,87 @@ function ensurePmtilesProtocol() {
   }
 }
 
+// Clean, high-resolution basemap specification for MapLibre
 const mapStyle: maplibregl.StyleSpecification = {
   version: 8,
   sources: {
-    cartoLight: {
+    satellite: {
       type: 'raster',
       tiles: [
-        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       ],
       tileSize: 256,
-      attribution: '© OpenStreetMap contributors, © CARTO',
+      maxzoom: 19,
+      attribution: '© Esri, Maxar, Earthstar Geographics',
+    },
+    satelliteLabels: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      attribution: '© Esri',
+    },
+    esriStreets: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      attribution: '© Esri, HERE, Garmin',
+    },
+    esriDark: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      attribution: '© Esri, HERE, Garmin',
+    },
+    esriDarkLabels: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      attribution: '© Esri',
     },
   },
   layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': '#F8FAFC' } },
     {
-      id: 'cartoLight',
+      id: 'sat',
       type: 'raster',
-      source: 'cartoLight',
-      paint: {
-        'raster-saturation': 0.1,
-        'raster-contrast': 0.05,
-      },
+      source: 'satellite',
+      layout: { visibility: 'visible' },
+      paint: { 'raster-opacity': 1.0 },
+    },
+    {
+      id: 'streets',
+      type: 'raster',
+      source: 'esriStreets',
+      layout: { visibility: 'none' },
+      paint: { 'raster-opacity': 1.0 },
+    },
+    {
+      id: 'dark',
+      type: 'raster',
+      source: 'esriDark',
+      layout: { visibility: 'none' },
+      paint: { 'raster-opacity': 1.0 },
+    },
+    {
+      id: 'dark-labels',
+      type: 'raster',
+      source: 'esriDarkLabels',
+      layout: { visibility: 'none' },
+      paint: { 'raster-opacity': 0.95 },
+    },
+    {
+      id: 'lab',
+      type: 'raster',
+      source: 'satelliteLabels',
+      layout: { visibility: 'visible' },
+      paint: { 'raster-opacity': 0.95 },
     },
   ],
 };
@@ -76,8 +136,12 @@ const INITIAL_VIEW_STATE = {
 export default function MapView(props: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+
+  // Mutable refs to prevent useEffect tearing down map
   const onMapClickRef = useRef(props.onMapClick);
   const onPolygonDrawRef = useRef(props.onPolygonDraw);
+  const drawingRef = useRef(false);
+  const drawVerticesRef = useRef<[number, number][]>([]);
 
   const {
     layerOpacity,
@@ -98,6 +162,11 @@ export default function MapView(props: MapViewProps) {
   const [pmtilesAvailable, setPmtilesAvailable] = useState(false);
   const [pmtilesBaseUrl, setPmtilesBaseUrl] = useState<string>('/tiles');
 
+  // Basemap & Area State
+  const [basemap, setBasemap] = useState<BasemapMode>('satellite');
+  const [selectedAreaId, setSelectedAreaId] = useState<string>('all');
+  const [filterByArea, setFilterByArea] = useState<boolean>(false);
+
   // Drawing state
   const [drawing, setDrawing] = useState(false);
   const [drawVertices, setDrawVertices] = useState<[number, number][]>([]);
@@ -106,6 +175,33 @@ export default function MapView(props: MapViewProps) {
     onMapClickRef.current = props.onMapClick;
     onPolygonDrawRef.current = props.onPolygonDraw;
   }, [props.onMapClick, props.onPolygonDraw]);
+
+  useEffect(() => {
+    drawingRef.current = drawing;
+    drawVerticesRef.current = drawVertices;
+  }, [drawing, drawVertices]);
+
+  // Handle map clicks (normal or drawing vertices)
+  const handleCoordClick = (lat: number, lon: number) => {
+    if (drawingRef.current) {
+      const next: [number, number][] = [...drawVerticesRef.current, [lon, lat]];
+      if (next.length >= 3) {
+        const ring: [number, number][] = [next[0], next[1], next[2], next[0]];
+        const poly: GeoJSON.Polygon = {
+          type: 'Polygon',
+          coordinates: [ring],
+        };
+        setDrawing(false);
+        setDrawVertices([]);
+        setDrawnPolygon(poly);
+        onPolygonDrawRef.current(poly);
+      } else {
+        setDrawVertices(next);
+      }
+    } else {
+      onMapClickRef.current(lat, lon);
+    }
+  };
 
   // Check PMTiles manifest & load fallback datasets on mount
   useEffect(() => {
@@ -171,28 +267,6 @@ export default function MapView(props: MapViewProps) {
       .catch((err: unknown) => console.warn('Failed to load /mock_hotspots.geojson:', err));
   }, []);
 
-  // Handle map clicks (normal or drawing vertices)
-  const handleCoordClick = (lat: number, lon: number) => {
-    if (drawing) {
-      const next: [number, number][] = [...drawVertices, [lon, lat]];
-      if (next.length >= 3) {
-        const ring: [number, number][] = [next[0], next[1], next[2], next[0]];
-        const poly: GeoJSON.Polygon = {
-          type: 'Polygon',
-          coordinates: [ring],
-        };
-        setDrawing(false);
-        setDrawVertices([]);
-        setDrawnPolygon(poly);
-        onPolygonDrawRef.current(poly);
-      } else {
-        setDrawVertices(next);
-      }
-    } else {
-      onMapClickRef.current(lat, lon);
-    }
-  };
-
   // Convert dynamic isochrone data into GeoJSON FeatureCollection
   const dynamicIsoGeoJSON = useMemo(() => {
     if (!isochroneData?.polygons) return null;
@@ -206,25 +280,76 @@ export default function MapView(props: MapViewProps) {
     return { type: 'FeatureCollection', features } as GeoJSON.FeatureCollection;
   }, [isochroneData]);
 
-  // Initialize MapLibre
+  // Filter features if area filter is active
+  const displayedHexFeatures = useMemo(() => {
+    if (!scoresGeojson?.features) return [];
+    if (selectedAreaId === 'all' || !filterByArea) {
+      return scoresGeojson.features;
+    }
+    const area = AUSTIN_AREAS.find((a) => a.id === selectedAreaId);
+    if (!area) return scoresGeojson.features;
+    const [aLon, aLat] = area.center;
+    // Area radius ~0.045 deg (~5km)
+    return scoresGeojson.features.filter((f) => {
+      const coords = (f.geometry as GeoJSON.Polygon)?.coordinates?.[0]?.[0];
+      if (!coords) return false;
+      const dLon = coords[0] - aLon;
+      const dLat = coords[1] - aLat;
+      return Math.sqrt(dLon * dLon + dLat * dLat) <= 0.045;
+    });
+  }, [scoresGeojson, selectedAreaId, filterByArea]);
+
+  // Handle Area Selection & Camera Flight
+  const handleSelectArea = (area: AustinArea) => {
+    setSelectedAreaId(area.id);
+    const map = mapRef.current;
+    if (map) {
+      map.flyTo({
+        center: area.center,
+        zoom: area.zoom,
+        speed: 1.2,
+        essential: true,
+      });
+    }
+  };
+
+  // Initialize MapLibre ONCE on mount
   useEffect(() => {
+    console.log('MAPVIEW_USE_EFFECT_START', { container: containerRef.current });
     if (!containerRef.current) return;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: mapStyle,
-      center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
-      zoom: INITIAL_VIEW_STATE.zoom,
-      attributionControl: false,
-    });
+    let map: maplibregl.Map | null = null;
+    try {
+      map = new maplibregl.Map({
+        container: containerRef.current,
+        style: mapStyle,
+        center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+        zoom: INITIAL_VIEW_STATE.zoom,
+        attributionControl: false,
+      });
+      console.log('MAP_INSTANCE_CREATED:', map);
+    } catch (err) {
+      console.error('MAP_CONSTRUCTOR_CRITICAL_ERROR:', err);
+      return;
+    }
 
     mapRef.current = map;
+    (window as unknown as { __map: maplibregl.Map }).__map = map;
 
     map.on('load', () => {
+      console.log('MAP_ON_LOAD_EVENT_FIRED! isStyleLoaded:', map?.isStyleLoaded());
       setMapReady(true);
+      map?.resize();
     });
 
+    // Delayed resize to ensure layout is measured
+    const timer = setTimeout(() => {
+      console.log('MAP_RESIZE_TIMER_RUNNING');
+      map?.resize();
+    }, 150);
+
     map.on('move', () => {
+      if (!map) return;
       const center = map.getCenter();
       setViewState({
         longitude: center.lng,
@@ -239,12 +364,20 @@ export default function MapView(props: MapViewProps) {
       handleCoordClick(e.lngLat.lat, e.lngLat.lng);
     });
 
+    map.on('error', (e) => {
+      console.warn('MapLibre internal notice:', e);
+    });
+
     return () => {
-      map.remove();
+      console.log('MAP_EFFECT_CLEANUP');
+      clearTimeout(timer);
+      if (map) {
+        map.remove();
+      }
       mapRef.current = null;
       setMapReady(false);
     };
-  }, [drawing, drawVertices]);
+  }, []); // Mount ONCE
 
   // Smooth camera flying to selectedSite (e.g. from demo pins or compare chips)
   useEffect(() => {
@@ -256,6 +389,45 @@ export default function MapView(props: MapViewProps) {
       speed: 1.2,
     });
   }, [selectedSite]);
+
+  // FlyTo effect from store
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && mapReady && flyTo) {
+      map.flyTo({
+        center: [flyTo.lon, flyTo.lat],
+        zoom: flyTo.zoom || 14,
+        essential: true,
+      });
+      useAppStore.getState().setFlyTo(null);
+    }
+  }, [flyTo, mapReady]);
+
+  // Switch Basemap raster layers instantly
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const isSatellite = basemap === 'satellite';
+    const isStreets = basemap === 'streets';
+    const isDark = basemap === 'dark';
+
+    if (map.getLayer('sat')) {
+      map.setLayoutProperty('sat', 'visibility', isSatellite ? 'visible' : 'none');
+    }
+    if (map.getLayer('lab')) {
+      map.setLayoutProperty('lab', 'visibility', isSatellite ? 'visible' : 'none');
+    }
+    if (map.getLayer('streets')) {
+      map.setLayoutProperty('streets', 'visibility', isStreets ? 'visible' : 'none');
+    }
+    if (map.getLayer('dark')) {
+      map.setLayoutProperty('dark', 'visibility', isDark ? 'visible' : 'none');
+    }
+    if (map.getLayer('dark-labels')) {
+      map.setLayoutProperty('dark-labels', 'visibility', isDark ? 'visible' : 'none');
+    }
+  }, [basemap, mapReady]);
 
   // Sync MapLibre vector/raster layers (roads, flood_zones, isochrone, pmtiles)
   useEffect(() => {
@@ -276,7 +448,7 @@ export default function MapView(props: MapViewProps) {
       removeFloodLayer(map);
     }
 
-    // Isochrone (concentric green rings)
+    // Isochrone (concentric rings)
     if (props.activeLayers.includes('isochrone')) {
       addIsoLayers(map, dynamicIsoGeoJSON || '/mock_iso.geojson');
     } else {
@@ -304,7 +476,7 @@ export default function MapView(props: MapViewProps) {
           source: 'pmtiles-h3',
           'source-layer': 'h3_grid',
           paint: {
-            'fill-opacity': layerOpacity?.h3_grid ?? 0.75,
+            'fill-opacity': (layerOpacity?.h3_grid ?? 0.50) * 0.7,
             'fill-color': [
               'step',
               ['coalesce', ['get', 'score_retail'], ['get', 'score'], 0],
@@ -336,7 +508,7 @@ export default function MapView(props: MapViewProps) {
           map.getCanvas().style.cursor = '';
         });
       } else {
-        map.setPaintProperty('pmtiles-h3-layer', 'fill-opacity', layerOpacity?.h3_grid ?? 0.75);
+        map.setPaintProperty('pmtiles-h3-layer', 'fill-opacity', (layerOpacity?.h3_grid ?? 0.50) * 0.7);
       }
     } else {
       if (map.getLayer('pmtiles-h3-layer')) map.removeLayer('pmtiles-h3-layer');
@@ -391,28 +563,15 @@ export default function MapView(props: MapViewProps) {
     }
   }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
 
-  // FlyTo effect
-  useEffect(() => {
-    const map = mapRef.current;
-    if (map && mapReady && flyTo) {
-      map.flyTo({
-        center: [flyTo.lon, flyTo.lat],
-        zoom: flyTo.zoom || 14,
-        essential: true
-      });
-      useAppStore.getState().setFlyTo(null);
-    }
-  }, [flyTo, mapReady]);
-
   // Build deck.gl layers
   const deckLayers = [];
 
-  // 1. H3 Hex Score layer (fallback when not using PMTiles)
-  if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && scoresGeojson) {
+  // 1. H3 Hex Score layer (rendered with semi-transparency so satellite imagery is clear)
+  if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && displayedHexFeatures.length > 0) {
     deckLayers.push(
       createHexLayer({
-        data: scoresGeojson,
-        opacity: layerOpacity?.h3_grid ?? 0.75,
+        data: { type: 'FeatureCollection', features: displayedHexFeatures },
+        opacity: layerOpacity?.h3_grid ?? 0.50,
         onHover: (info: unknown) => {
           const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
           if (pickInfo.object?.properties) {
@@ -437,7 +596,7 @@ export default function MapView(props: MapViewProps) {
     );
   }
 
-  // 2. Hotspot layer (fallback when not using PMTiles)
+  // 2. Hotspot layer
   if (!pmtilesAvailable && props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
     deckLayers.push(
       createHotspotLayer({
@@ -530,7 +689,7 @@ export default function MapView(props: MapViewProps) {
   return (
     <div className="relative w-full h-full">
       {/* MapLibre canvas container */}
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0 w-full h-full" />
 
       {/* deck.gl overlay */}
       <div className="absolute inset-0 z-[1]">
@@ -546,6 +705,91 @@ export default function MapView(props: MapViewProps) {
             }
           }}
         />
+      </div>
+
+      {/* FLOATING TOP TOOLBAR: AREA NAVIGATOR + BASEMAP SWITCHER (cleanly positioned between panels) */}
+      <div className="absolute top-20 left-72 z-20 flex flex-wrap items-center gap-2 max-w-[calc(100vw-700px)] select-none pointer-events-auto">
+        {/* AUSTIN AREA NAVIGATOR */}
+        <div className="flex items-center gap-1 bg-white/95 backdrop-blur border border-slate-200 p-1.5 rounded-lg shadow-md overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <span className="font-mono text-[10px] text-slate-500 uppercase px-2 font-semibold whitespace-nowrap">
+            AREAS:
+          </span>
+          {AUSTIN_AREAS.map((area) => {
+            const isSelected = selectedAreaId === area.id;
+            return (
+              <button
+                key={area.id}
+                onClick={() => handleSelectArea(area)}
+                className={`font-mono text-[11px] px-2 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-slate-900 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                }`}
+                title={area.description}
+              >
+                {area.shortName}
+              </button>
+            );
+          })}
+
+          <div className="h-4 w-px bg-slate-200 mx-1" />
+
+          {/* Toggle between All Metro vs Focused Area Hexes */}
+          {selectedAreaId !== 'all' && (
+            <button
+              onClick={() => setFilterByArea((prev) => !prev)}
+              className={`font-mono text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer whitespace-nowrap ${
+                filterByArea
+                  ? 'bg-emerald-600 text-white border-emerald-600 font-semibold'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              {filterByArea ? '✓ AREA ONLY' : 'ALL METRO'}
+            </button>
+          )}
+        </div>
+
+        {/* BASEMAP MODE SWITCHER (Satellite vs Streets vs Dark) */}
+        <div className="flex items-center gap-1 bg-white/95 backdrop-blur border border-slate-200 p-1 rounded-lg shadow-md select-none">
+          <button
+            onClick={() => setBasemap('satellite')}
+            className={`font-mono text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+              basemap === 'satellite'
+                ? 'bg-emerald-700 text-white font-bold shadow-xs'
+                : 'text-slate-700 hover:bg-slate-100 font-medium'
+            }`}
+            title="ESRI High-Resolution World Imagery + Street Labels"
+          >
+            <span>🛰️</span>
+            <span>SATELLITE</span>
+          </button>
+
+          <button
+            onClick={() => setBasemap('streets')}
+            className={`font-mono text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+              basemap === 'streets'
+                ? 'bg-slate-900 text-white font-bold shadow-xs'
+                : 'text-slate-700 hover:bg-slate-100 font-medium'
+            }`}
+            title="Carto Positron / Voyager Street Map"
+          >
+            <span>🗺️</span>
+            <span>STREETS</span>
+          </button>
+
+          <button
+            onClick={() => setBasemap('dark')}
+            className={`font-mono text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+              basemap === 'dark'
+                ? 'bg-slate-900 text-white font-bold shadow-xs'
+                : 'text-slate-700 hover:bg-slate-100 font-medium'
+            }`}
+            title="Carto Dark Matter Canvas"
+          >
+            <span>🌌</span>
+            <span>DARK</span>
+          </button>
+        </div>
       </div>
 
       {/* Hover tooltip */}
@@ -631,12 +875,12 @@ export default function MapView(props: MapViewProps) {
         onPolygonDraw={props.onPolygonDraw}
       />
 
-      {/* Cyber-grid overlay & status tag */}
-      <div className="cyber-grid absolute inset-0 pointer-events-none z-[1]" />
-      <div className="absolute top-3 left-3 z-[2] font-mono text-[11px] uppercase tracking-wider text-emerald-700 bg-white/90 backdrop-blur border border-slate-200 px-2.5 py-1 rounded-md shadow-xs font-semibold flex items-center gap-1.5">
+      {/* Status tag */}
+      <div className="absolute bottom-6 left-72 z-20 font-mono text-[11px] uppercase tracking-wider text-emerald-800 bg-white/95 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-md shadow-xs font-semibold flex items-center gap-2 select-none">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>MAP ENGINE // LIVE</span>
+        <span>MAP ENGINE // {basemap.toUpperCase()} HYBRID</span>
       </div>
     </div>
   );
 }
+

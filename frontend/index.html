@@ -10,6 +10,26 @@
         background: #050505;
       }
     </style>
+    <script>
+      window.__allErrors = [];
+      window.addEventListener('error', function(e) {
+        window.__allErrors.push({
+          message: e.message,
+          filename: e.filename,
+          lineno: e.lineno,
+          colno: e.colno,
+          error: e.error ? (e.error.stack || e.error.message || String(e.error)) : String(e)
+        });
+        console.error('TRAPPED_ERROR:', e.message, e.error);
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        window.__allErrors.push({
+          type: 'unhandledrejection',
+          reason: e.reason ? (e.reason.stack || e.reason.message || String(e.reason)) : String(e)
+        });
+        console.error('TRAPPED_REJECTION:', e.reason);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
