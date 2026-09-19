@@ -84,17 +84,24 @@ export interface AppState {
   setIsProfileModalOpen: (open: boolean) => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   currentView: 'explorer',
-  setCurrentView: (view) => set({ currentView: view, showLandingPage: false, authView: null }),
+  setCurrentView: (view) => {
+    window.location.hash = view;
+    set({ currentView: view, showLandingPage: false, authView: null });
+  },
   showLandingPage: !loadUser(), // Show landing page if no active session
-  setShowLandingPage: (show) => set({ showLandingPage: show, authView: null }),
+  setShowLandingPage: (show) => {
+    window.location.hash = show ? 'landing' : get().currentView;
+    set({ showLandingPage: show, authView: null });
+  },
   authView: null,
   setAuthView: (view) => set({ authView: view, showLandingPage: false }),
   isOnboardingOpen: false,
   setIsOnboardingOpen: (open) => set({ isOnboardingOpen: open }),
   login: (user) => {
     saveUser(user);
+    window.location.hash = 'explorer';
     set({
       currentUser: user,
       authView: null,
@@ -104,6 +111,7 @@ export const useAppStore = create<AppState>((set) => ({
   },
   logout: () => {
     saveUser(null as any);
+    window.location.hash = 'landing';
     set({
       currentUser: null,
       showLandingPage: true,

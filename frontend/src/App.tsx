@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MapView from './components/MapView';
 import TopBar from './components/TopBar';
 import LayerPanel from './components/LayerPanel';
@@ -25,6 +25,26 @@ export default function App() {
   const [booted, setBooted] = useState(false);
   const [batchResults, setBatchResults] = useState<any[]>([]);
   const [showBatch, setShowBatch] = useState(false);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash === 'landing' || hash === '') {
+        useAppStore.getState().setShowLandingPage(true);
+      } else if (['explorer', 'requirements', 'collections', 'compare', 'methodology'].includes(hash)) {
+        useAppStore.getState().setCurrentView(hash as any);
+      }
+    };
+    
+    if (!window.location.hash) {
+      window.location.hash = useAppStore.getState().showLandingPage ? 'landing' : useAppStore.getState().currentView;
+    } else {
+      handleHashChange();
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const {
     showLandingPage,
