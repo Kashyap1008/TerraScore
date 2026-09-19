@@ -18,7 +18,7 @@ export default function TopBar() {
       </div>
       
       <div className="flex gap-2">
-        <button className="bg-transparent border border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black font-mono text-xs uppercase px-3 py-1.5 rounded-sm transition-colors cursor-pointer">
+        <button onClick={() => window.print()} className="bg-transparent border border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black font-mono text-xs uppercase px-3 py-1.5 rounded-sm transition-colors cursor-pointer">
           EXPORT
         </button>
         <button className="bg-transparent border border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black font-mono text-xs uppercase px-3 py-1.5 rounded-sm transition-colors cursor-pointer">

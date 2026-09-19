@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 const LAYERS = [
@@ -5,7 +6,9 @@ const LAYERS = [
   { id: 'roads', label: 'ROAD_NETWORK' },
   { id: 'flood_zones', label: 'FLOOD_ZONES' },
   { id: 'pois', label: 'COMPETITORS' },
-  { id: 'transit_stops', label: 'TRANSIT_STOPS' }
+  { id: 'transit_stops', label: 'TRANSIT_STOPS' },
+  { id: 'hotspots', label: 'HOTSPOTS' },
+  { id: 'isochrone', label: 'ISOCHRONE' }
 ];
 
 export default function LayerPanel() {

@@ -14,6 +14,7 @@ export interface AppState {
   weights: Record<string, number>;
   layerOpacity: Record<string, number>;
   drawnPolygon: GeoJSON.Polygon | null;
+  isochroneData: { polygons: Record<string, GeoJSON.Polygon>; population_reachable: Record<string, number> } | null;
   setPreset: (p: AppState['preset']) => void;
   toggleLayer: (id: string) => void;
   setSelectedSite: (s: AppState['selectedSite']) => void;
@@ -24,6 +25,7 @@ export interface AppState {
   resetWeights: () => void;
   setLayerOpacity: (id: string, value: number) => void;
   setDrawnPolygon: (p: GeoJSON.Polygon | null) => void;
+  setIsochroneData: (data: AppState['isochroneData']) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -32,8 +34,9 @@ export const useAppStore = create<AppState>((set) => ({
   selectedSite: null,
   compareList: [],
   weights: WEIGHTS_BY_PRESET.retail,
-  layerOpacity: { h3_grid: 0.75, roads: 0.6, flood_zones: 0.35, pois: 1.0, transit_stops: 1.0 },
+  layerOpacity: { h3_grid: 0.75, roads: 0.6, flood_zones: 0.35, pois: 1.0, transit_stops: 1.0, hotspots: 1.0, isochrone: 1.0 },
   drawnPolygon: null,
+  isochroneData: null,
   setPreset: (preset) => set({ preset, weights: WEIGHTS_BY_PRESET[preset] }),
   toggleLayer: (id) => set((state) => ({
     activeLayers: state.activeLayers.includes(id) 
@@ -58,5 +61,6 @@ export const useAppStore = create<AppState>((set) => ({
   setLayerOpacity: (id, value) => set((state) => ({
     layerOpacity: { ...state.layerOpacity, [id]: value }
   })),
-  setDrawnPolygon: (p) => set({ drawnPolygon: p })
+  setDrawnPolygon: (p) => set({ drawnPolygon: p }),
+  setIsochroneData: (data) => set({ isochroneData: data })
 }));

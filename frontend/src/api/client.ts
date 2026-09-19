@@ -16,30 +16,24 @@ export async function fetchScore(lat: number, lon: number, preset: PresetName, w
   return res.json();
 }
 
-export async function fetchLayers(): Promise<LayerMeta[]> {
-  if (USE_MOCK) {
-    return new Promise(resolve => setTimeout(() => resolve([]), 200));
-  }
-  const res = await fetch('/api/v1/layers');
+export async function fetchBatch(polygon: GeoJSON.Polygon, preset: PresetName, limit: number = 500) {
+  const res = await fetch('/api/v1/score/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ polygon, preset, limit })
+  });
   return res.json();
 }
 
-export async function fetchHotspots(preset: PresetName, type: 'hot' | 'cold') {
-  if (USE_MOCK) {
-    return new Promise(resolve => setTimeout(() => resolve({}), 200));
-  }
-  const res = await fetch(`/api/v1/hotspots?preset=${preset}&type=${type}`);
-  return res.json();
-}
-
-export async function fetchIsochrone(lat: number, lon: number) {
-  if (USE_MOCK) {
-    return new Promise(resolve => setTimeout(() => resolve({}), 200));
-  }
+export async function fetchIsochrone(lat: number, lon: number, minutes: number[] = [10, 20, 30], mode: string = 'driving') {
   const res = await fetch('/api/v1/isochrone', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lat, lon })
+    body: JSON.stringify({ lat, lon, minutes, mode })
   });
   return res.json();
+}
+
+export function reportUrl(h3: string, preset: PresetName): string {
+  return `/api/v1/report/${h3}?preset=${preset}`;
 }

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { fetchScore } from '../api/client';
+import { fetchScore, fetchIsochrone, reportUrl } from '../api/client';
 import type { ScoreResponse } from '../api/types';
 import WeightSliders from './WeightSliders';
 
 export default function SiteScoreCard() {
-  const { selectedSite, preset, weights, setWeight, resetWeights, addToCompare } = useAppStore();
+  const { selectedSite, preset, weights, setWeight, resetWeights, addToCompare, setIsochroneData, toggleLayer, activeLayers } = useAppStore();
   const [scoreData, setScoreData] = useState<ScoreResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -86,12 +86,37 @@ export default function SiteScoreCard() {
           onReset={resetWeights} 
         />
 
-        <button 
-          onClick={() => addToCompare(selectedSite)}
-          className="mt-4 border border-neonCyan text-neonCyan hover:bg-neonCyan hover:text-black font-mono text-xs uppercase px-3 py-2 rounded-sm transition-colors"
-        >
-          PIN TO COMPARE
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button 
+            onClick={() => addToCompare(selectedSite)}
+            className="flex-1 border border-neonCyan text-neonCyan hover:bg-neonCyan hover:text-black font-mono text-[10px] uppercase px-2 py-2 rounded-sm transition-colors text-center whitespace-nowrap"
+          >
+            PIN TO COMPARE
+          </button>
+          <button 
+            onClick={() => {
+              fetchIsochrone(selectedSite.lat, selectedSite.lon).then(data => {
+                setIsochroneData(data);
+                if (!activeLayers.includes('isochrone')) {
+                  toggleLayer('isochrone');
+                }
+              });
+            }}
+            className="flex-1 border border-neonCyan text-neonCyan hover:bg-neonCyan hover:text-black font-mono text-[10px] uppercase px-2 py-2 rounded-sm transition-colors text-center whitespace-nowrap"
+          >
+            ISOCHRONE
+          </button>
+          <button 
+            onClick={() => {
+              if (scoreData?.h3) {
+                window.open(reportUrl(scoreData.h3, preset), '_blank');
+              }
+            }}
+            className="flex-1 border border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black font-mono text-[10px] uppercase px-2 py-2 rounded-sm transition-colors text-center whitespace-nowrap"
+          >
+            EXPORT PDF
+          </button>
+        </div>
       </div>
     </div>
   );
