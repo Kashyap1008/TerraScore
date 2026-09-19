@@ -83,6 +83,7 @@ export default function MapView(props: MapViewProps) {
     setDrawnPolygon,
     selectedSite,
     isochroneData,
+    flyTo,
   } = useAppStore();
 
   const [mapReady, setMapReady] = useState(false);
@@ -387,6 +388,19 @@ export default function MapView(props: MapViewProps) {
       }
     }
   }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
+
+  // FlyTo effect
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && mapReady && flyTo) {
+      map.flyTo({
+        center: [flyTo.lon, flyTo.lat],
+        zoom: flyTo.zoom || 14,
+        essential: true
+      });
+      useAppStore.getState().setFlyTo(null);
+    }
+  }, [flyTo, mapReady]);
 
   // Build deck.gl layers
   const deckLayers = [];

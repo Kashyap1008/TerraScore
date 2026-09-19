@@ -2,7 +2,7 @@ import type { ScoreResponse, PresetName, LayerMeta } from './types';
 import { MOCK_SCORE_RESPONSE } from './mockData';
 
 // Keep USE_MOCK = true until Megh confirms the endpoint is live
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 export async function fetchScore(lat: number, lon: number, preset: PresetName, weights?: Record<string, number>): Promise<ScoreResponse> {
   if (USE_MOCK) {

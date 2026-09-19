@@ -11,6 +11,7 @@ export default function TopBar() {
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 21 16z"></path>
         </svg>
         <span className="font-mono uppercase tracking-widest text-xs text-white">SITE_READINESS</span>
+        <span className="font-mono uppercase tracking-widest text-[10px] text-textMuted ml-4 border border-panelEdge px-2 py-0.5">// AUSTIN, TX</span>
       </div>
       
       <div>

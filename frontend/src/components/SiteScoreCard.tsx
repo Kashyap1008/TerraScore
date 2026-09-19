@@ -24,7 +24,13 @@ export default function SiteScoreCard() {
     }
   }, [selectedSite, preset, weights]);
 
-  if (!selectedSite || (!scoreData && !loading)) return null;
+  if (!selectedSite || (!scoreData && !loading)) return (
+    <div className="absolute top-20 right-4 w-96 z-20">
+      <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-sm shadow-neon-green p-6 flex flex-col items-center justify-center h-32">
+        <span className="font-mono text-textMuted text-xs uppercase">// CLICK A HEXAGON TO ANALYZE</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="absolute top-20 right-4 w-96 z-20">

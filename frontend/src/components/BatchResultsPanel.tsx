@@ -4,6 +4,14 @@ import { useAppStore } from '../store/useAppStore';
 export default function BatchResultsPanel({ results, visible, onClose }: { results: any[]; visible: boolean; onClose: () => void }) {
   const { setSelectedSite } = useAppStore();
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && visible) onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [visible, onClose]);
+
   if (!visible) return null;
 
   return (

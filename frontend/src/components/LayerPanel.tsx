@@ -12,7 +12,12 @@ const LAYERS = [
 ];
 
 export default function LayerPanel() {
-  const { activeLayers, toggleLayer, layerOpacity, setLayerOpacity } = useAppStore();
+  const { activeLayers, toggleLayer, layerOpacity, setLayerOpacity, setSelectedSite, setFlyTo } = useAppStore();
+
+  const handleDemoPin = (lat: number, lon: number) => {
+    setSelectedSite({ lat, lon });
+    setFlyTo({ lat, lon, zoom: 14 });
+  };
 
   return (
     <div className="absolute top-20 left-4 w-64 z-20 bg-panel/85 backdrop-blur border border-panelEdge rounded-sm shadow-neon-cyan">
@@ -53,6 +58,31 @@ export default function LayerPanel() {
             </div>
           );
         })}
+      </div>
+      <div className="border-t border-panelEdge px-3 py-2 mt-2">
+        <div className="font-mono text-textMuted text-[10px] uppercase tracking-widest mb-3">
+          // DEMO_PINS
+        </div>
+        <div className="flex flex-col gap-2">
+          <button 
+            onClick={() => handleDemoPin(30.27, -97.74)}
+            className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
+          >
+            [ HIGH_DEMAND ]
+          </button>
+          <button 
+            onClick={() => handleDemoPin(30.26, -97.75)}
+            className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
+          >
+            [ FLOOD_RISK ]
+          </button>
+          <button 
+            onClick={() => handleDemoPin(30.29, -97.72)}
+            className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
+          >
+            [ UNDERSERVED ]
+          </button>
+        </div>
       </div>
     </div>
   );
