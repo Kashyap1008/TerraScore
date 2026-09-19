@@ -3,19 +3,12 @@ import { useAppStore } from '../store/useAppStore';
 
 export default function LandingPage() {
   const {
-    setShowLandingPage,
     setIsAuthModalOpen,
     setIsOnboardingOpen,
-    setCurrentView,
   } = useAppStore();
 
   const handleGetStarted = () => {
     setIsOnboardingOpen(true);
-  };
-
-  const handleLaunchLiveSandbox = () => {
-    setShowLandingPage(false);
-    setCurrentView('explorer');
   };
 
   return (
@@ -104,7 +97,7 @@ export default function LandingPage() {
           Eliminate intuition-based expansion risks. TerraScorer combines Uber H3 hexagonal tessellation, multi-modal drive-time catchments, and <strong>SHAP decision attribution</strong> to identify high-conviction commercial parcels in seconds.
         </p>
 
-        {/* Dual Primary Call-To-Action */}
+        {/* Primary Call-To-Action */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <button
             onClick={handleGetStarted}
@@ -115,10 +108,10 @@ export default function LandingPage() {
           </button>
 
           <button
-            onClick={handleLaunchLiveSandbox}
+            onClick={() => setIsAuthModalOpen(true)}
             className="w-full sm:w-auto px-7 py-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-white font-mono text-sm font-bold uppercase rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 hover:border-slate-500"
           >
-            <span>🗺️ EXPLORE AUSTIN LIVE TERMINAL</span>
+            <span>🔐 SIGN IN TO WORKSPACE</span>
           </button>
         </div>
 
@@ -294,10 +287,10 @@ export default function LandingPage() {
             Create Your Account &rarr;
           </button>
           <button
-            onClick={handleLaunchLiveSandbox}
+            onClick={() => setIsAuthModalOpen(true)}
             className="px-7 py-4 bg-slate-900 hover:bg-slate-800 text-white font-mono text-sm font-bold uppercase rounded-2xl border border-slate-700 transition-all cursor-pointer"
           >
-            Launch Interactive Map
+            Sign In to Workspace
           </button>
         </div>
 

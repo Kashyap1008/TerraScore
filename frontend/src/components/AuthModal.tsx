@@ -3,7 +3,14 @@ import { useAppStore } from '../store/useAppStore';
 import { DEMO_USERS, type UserProfile } from '../utils/storage';
 
 export default function AuthModal() {
-  const { isAuthModalOpen, setIsAuthModalOpen, currentUser, setCurrentUser } = useAppStore();
+  const {
+    isAuthModalOpen,
+    setIsAuthModalOpen,
+    currentUser,
+    setCurrentUser,
+    setShowLandingPage,
+    setCurrentView,
+  } = useAppStore();
   const [tab, setTab] = useState<'login' | 'register'>('login');
 
   const [name, setName] = useState('');
@@ -27,11 +34,15 @@ export default function AuthModal() {
     };
     setCurrentUser(newUser);
     setIsAuthModalOpen(false);
+    setShowLandingPage(false);
+    setCurrentView('explorer');
   };
 
   const handleSelectDemo = (user: UserProfile) => {
     setCurrentUser(user);
     setIsAuthModalOpen(false);
+    setShowLandingPage(false);
+    setCurrentView('explorer');
   };
 
   return (
