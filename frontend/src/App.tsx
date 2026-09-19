@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import MapView from './components/MapView';
 import TopBar from './components/TopBar';
 import LayerPanel from './components/LayerPanel';

@@ -1,0 +1,141 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fz_1",
+        "zone": "AE",
+        "risk": "high",
+        "label": "FEMA 100-yr Lady Bird Lake Corridor"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -97.77,
+              30.262
+            ],
+            [
+              -97.755,
+              30.26
+            ],
+            [
+              -97.738,
+              30.252
+            ],
+            [
+              -97.725,
+              30.25
+            ],
+            [
+              -97.726,
+              30.243
+            ],
+            [
+              -97.742,
+              30.247
+            ],
+            [
+              -97.758,
+              30.253
+            ],
+            [
+              -97.772,
+              30.256
+            ],
+            [
+              -97.77,
+              30.262
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fz_2",
+        "zone": "A",
+        "risk": "high",
+        "label": "Shoal Creek Drainage Tributary"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -97.756,
+              30.285
+            ],
+            [
+              -97.751,
+              30.278
+            ],
+            [
+              -97.75,
+              30.267
+            ],
+            [
+              -97.746,
+              30.262
+            ],
+            [
+              -97.752,
+              30.261
+            ],
+            [
+              -97.755,
+              30.27
+            ],
+            [
+              -97.758,
+              30.282
+            ],
+            [
+              -97.756,
+              30.285
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fz_3",
+        "zone": "X500",
+        "risk": "medium",
+        "label": "East Austin Buffer Basin"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -97.73,
+              30.268
+            ],
+            [
+              -97.718,
+              30.267
+            ],
+            [
+              -97.715,
+              30.255
+            ],
+            [
+              -97.727,
+              30.257
+            ],
+            [
+              -97.73,
+              30.268
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

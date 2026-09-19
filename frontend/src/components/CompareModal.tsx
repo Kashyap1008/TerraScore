@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { fetchScore } from '../api/client';
 import type { ScoreResponse } from '../api/types';

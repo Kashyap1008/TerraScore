@@ -1,0 +1,380 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_0",
+        "name": "Metro Stop 100",
+        "route": "Route 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7511,
+          30.2372
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_1",
+        "name": "Metro Stop 101",
+        "route": "Route 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.739734,
+          30.2396
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_2",
+        "name": "Metro Stop 102",
+        "route": "Route 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.731463,
+          30.242
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_3",
+        "name": "Metro Stop 103",
+        "route": "Route 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.750536,
+          30.2444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_4",
+        "name": "Metro Stop 104",
+        "route": "Route 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.746127,
+          30.2468
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_5",
+        "name": "Metro Stop 105",
+        "route": "Route 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.738936,
+          30.2492
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_6",
+        "name": "Metro Stop 106",
+        "route": "Route 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.752218,
+          30.2516
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_7",
+        "name": "Metro Stop 107",
+        "route": "Route 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.740472,
+          30.254
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_8",
+        "name": "Metro Stop 108",
+        "route": "Route 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.731143,
+          30.2564
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_9",
+        "name": "Metro Stop 109",
+        "route": "Route 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.749452,
+          30.2588
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_10",
+        "name": "Metro Stop 110",
+        "route": "Route 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.745276,
+          30.2612
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_11",
+        "name": "Metro Stop 111",
+        "route": "Route 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7391,
+          30.2636
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_12",
+        "name": "Metro Stop 112",
+        "route": "Route 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.753246,
+          30.266
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_13",
+        "name": "Metro Stop 113",
+        "route": "Route 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.741419,
+          30.2684
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_14",
+        "name": "Metro Stop 114",
+        "route": "Route 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.731138,
+          30.2708
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_15",
+        "name": "Metro Stop 115",
+        "route": "Route 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.748499,
+          30.2732
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_16",
+        "name": "Metro Stop 116",
+        "route": "Route 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.744252,
+          30.2756
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_17",
+        "name": "Metro Stop 117",
+        "route": "Route 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.738946,
+          30.278
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_18",
+        "name": "Metro Stop 118",
+        "route": "Route 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.754104,
+          30.2804
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_19",
+        "name": "Metro Stop 119",
+        "route": "Route 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7425,
+          30.2828
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_20",
+        "name": "Metro Stop 120",
+        "route": "Route 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.731448,
+          30.2852
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_21",
+        "name": "Metro Stop 121",
+        "route": "Route 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.747753,
+          30.2876
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_22",
+        "name": "Metro Stop 122",
+        "route": "Route 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.743135,
+          30.29
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_23",
+        "name": "Metro Stop 123",
+        "route": "Route 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.738485,
+          30.2924
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "stop_24",
+        "name": "Metro Stop 124",
+        "route": "Route 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.754722,
+          30.2948
+        ]
+      }
+    }
+  ]
+}
