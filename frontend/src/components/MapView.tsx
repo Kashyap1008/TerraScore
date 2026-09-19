@@ -92,6 +92,11 @@ const mapStyle: maplibregl.StyleSpecification = {
   },
   layers: [
     {
+      id: 'bg',
+      type: 'background',
+      paint: { 'background-color': '#f8fafc' }
+    },
+    {
       id: 'sat',
       type: 'raster',
       source: 'satellite',
