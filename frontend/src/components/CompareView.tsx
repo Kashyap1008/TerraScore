@@ -20,19 +20,16 @@ export default function CompareView() {
   } = useAppStore();
 
   const [data, setData] = useState<(ScoreResponse | null)[]>([]);
-  const [loading, setLoading] = useState(false);
   const [deckTitle, setDeckTitle] = useState('Austin Q3 Retail Site Benchmark');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     if (compareList.length > 0) {
-      setLoading(true);
       Promise.all(compareList.map((s) => fetchScore(s.lat, s.lon, preset, weights)))
         .then((res) => {
           setData(res);
-          setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch(() => {});
     } else {
       setData([]);
     }
