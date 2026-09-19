@@ -1,9 +1,9 @@
 ﻿"""
 pipeline/config.py
 ------------------
-Metro-area configuration dataclass, loaded from environment variables.
-Import the module-level singleton ``METRO`` everywhere in the pipeline;
-never read os.environ directly in scripts.
+Metro-area configuration dataclass loaded from environment variables.
+Import the module-level singleton ``METRO`` everywhere in the pipeline.
+Never read os.environ directly in scripts.
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class MetroConfig:
     """Projected CRS for distance computations, e.g. 32614 (UTM 14N)."""
 
     h3_resolution: int
-    """H3 grid resolution (0-15). Resolution 9 → ~174 m edge length."""
+    """H3 grid resolution 0-15. Resolution 9 gives ~174 m edge length."""
 
     def __post_init__(self) -> None:
         minlon, minlat, maxlon, maxlat = self.bbox
@@ -65,5 +65,5 @@ def _load() -> MetroConfig:
     )
 
 
-#: Module-level singleton — import this, do not construct MetroConfig yourself.
+#: Module-level singleton -- import this, do not construct MetroConfig yourself.
 METRO: MetroConfig = _load()

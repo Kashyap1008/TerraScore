@@ -1,8 +1,8 @@
 ﻿"""
 pipeline/utils.py
 -----------------
-Shared utilities consumed by every ingest and scoring script.
-No domain logic here — only infrastructure helpers.
+Shared infrastructure utilities for every ingest and scoring script.
+No domain logic here -- only database, spatial, and logging helpers.
 """
 from __future__ import annotations
 
@@ -25,16 +25,17 @@ logger = logging.getLogger(__name__)
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s -- %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-# ──────────────────────────────────────────────
+
+# ---------------------------------------------------------------------------
 # Database
-# ──────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 
 def get_engine() -> Engine:
-    """Return a SQLAlchemy engine from DB_URL env, with psycopg v3 driver."""
+    """Return a SQLAlchemy engine built from DB_URL env (psycopg v3 driver)."""
     url: str = os.getenv(
         "DB_URL",
         "postgresql+psycopg://geo:geo@localhost:5432/sitereadiness",
@@ -50,9 +51,9 @@ def ensure_schema(engine: Engine) -> None:
     logger.info("Schemas raw + derived ensured.")
 
 
-# ──────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 # Spatial helpers
-# ──────────────────────────────────────────────
+# ---------------------------------------------------------------------------
 
 def load_geojson(path: str | Path) -> GeoDataFrame:
     """Read any file GeoPandas understands and force CRS to EPSG:4326."""
@@ -87,16 +88,16 @@ def write_geodf(
         if_exists=if_exists,
         index=False,
     )
-    logger.info("Written %d rows to %s.%s", len(gdf), schema, table)
+    logger.info("Written %d rows -> %s.%s", len(gdf), schema, table)
 
 
-# ──────────────────────────────────────────────
-# Logging
-# ──────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Step logging
+# ---------------------------------------------------------------------------
 
 @contextmanager
 def log_step(name: str) -> Generator[None, None, None]:
-    """Context manager: prints '[STEP] <name> ... done in Xs'."""
+    """Context manager: logs '[STEP] <name> ... done in Xs'."""
     logger.info("[STEP] %s ...", name)
     t0 = time.perf_counter()
     yield
