@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import DeckGL from '@deck.gl/react';
+import { MapboxOverlay } from '@deck.gl/mapbox';
 import { ScatterplotLayer, GeoJsonLayer } from '@deck.gl/layers';
 import { Protocol } from 'pmtiles';
 import { createHexLayer } from '../layers/hexLayer';
@@ -14,6 +14,7 @@ import { addIsoLayers, removeIsoLayers } from '../layers/isoLayer';
 import DrawTool from './DrawTool';
 import { useAppStore } from '../store/useAppStore';
 import { AUSTIN_AREAS, type AustinArea } from '../config/austinAreas';
+import { resolveLocationName } from '../utils/locationResolver';
 
 export interface MapViewProps {
   activeLayers: string[];
@@ -29,6 +30,9 @@ interface HoveredCellInfo {
   score: number;
   x: number;
   y: number;
+  locationName: string;
+  submarket: string;
+  coordsFormatted: string;
 }
 
 let protocolRegistered = false;
@@ -136,6 +140,7 @@ const INITIAL_VIEW_STATE = {
 export default function MapView(props: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const overlayRef = useRef<MapboxOverlay | null>(null);
 
   // Mutable refs to prevent useEffect tearing down map
   const onMapClickRef = useRef(props.onMapClick);
@@ -153,7 +158,7 @@ export default function MapView(props: MapViewProps) {
   } = useAppStore();
 
   const [mapReady, setMapReady] = useState(false);
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [currentZoom, setCurrentZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const [scoresGeojson, setScoresGeojson] = useState<GeoJSON.FeatureCollection | null>(null);
   const [poiFeatures, setPoiFeatures] = useState<GeoJSON.Feature[]>([]);
   const [transitFeatures, setTransitFeatures] = useState<GeoJSON.Feature[]>([]);
@@ -294,7 +299,6 @@ export default function MapView(props: MapViewProps) {
     const area = AUSTIN_AREAS.find((a) => a.id === selectedAreaId);
     if (!area) return scoresGeojson.features;
     const [aLon, aLat] = area.center;
-    // Area radius ~0.045 deg (~5km)
     return scoresGeojson.features.filter((f) => {
       const coords = (f.geometry as GeoJSON.Polygon)?.coordinates?.[0]?.[0];
       if (!coords) return false;
@@ -318,67 +322,21 @@ export default function MapView(props: MapViewProps) {
     }
   };
 
-  const isDeckInteractingRef = useRef(false);
-
-  // Synchronize camera when user drags or zooms DeckGL
-  const handleViewStateChange = (params: { viewState: Record<string, unknown> }) => {
-    isDeckInteractingRef.current = true;
-    const nextState = params.viewState;
-    const next = {
-      longitude: Number(nextState.longitude ?? viewState.longitude),
-      latitude: Number(nextState.latitude ?? viewState.latitude),
-      zoom: Number(nextState.zoom ?? viewState.zoom),
-      pitch: Number(nextState.pitch ?? 0),
-      bearing: Number(nextState.bearing ?? 0),
-    };
-    setViewState(next);
-    if (mapRef.current) {
-      mapRef.current.jumpTo({
-        center: [next.longitude, next.latitude],
-        zoom: next.zoom,
-        bearing: next.bearing,
-        pitch: next.pitch,
-      });
-    }
-  };
-
-  const handleInteractionStateChange = (state: { isDragging?: boolean; isPanning?: boolean; isZooming?: boolean }) => {
-    if (!state.isDragging && !state.isPanning && !state.isZooming) {
-      setTimeout(() => {
-        isDeckInteractingRef.current = false;
-      }, 50);
-    } else {
-      isDeckInteractingRef.current = true;
-    }
-  };
-
-  // Zoom button handlers
+  // Zoom button handlers directly using MapLibre's camera animations
   const handleZoomIn = () => {
-    const nextZoom = Math.min(viewState.zoom + 1, 19);
-    setViewState((prev) => ({ ...prev, zoom: nextZoom }));
-    if (mapRef.current) {
-      mapRef.current.easeTo({ zoom: nextZoom, duration: 250 });
-    }
+    mapRef.current?.zoomIn({ duration: 250 });
   };
 
   const handleZoomOut = () => {
-    const nextZoom = Math.max(viewState.zoom - 1, 4);
-    setViewState((prev) => ({ ...prev, zoom: nextZoom }));
-    if (mapRef.current) {
-      mapRef.current.easeTo({ zoom: nextZoom, duration: 250 });
-    }
+    mapRef.current?.zoomOut({ duration: 250 });
   };
 
   const handleResetNorth = () => {
-    setViewState((prev) => ({ ...prev, bearing: 0, pitch: 0 }));
-    if (mapRef.current) {
-      mapRef.current.easeTo({ bearing: 0, pitch: 0, duration: 300 });
-    }
+    mapRef.current?.resetNorthPitch({ duration: 300 });
   };
 
   const handleResetMetro = () => {
     setSelectedAreaId('all');
-    setViewState(INITIAL_VIEW_STATE);
     if (mapRef.current) {
       mapRef.current.flyTo({
         center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
@@ -388,12 +346,12 @@ export default function MapView(props: MapViewProps) {
     }
   };
 
-  // Initialize MapLibre ONCE on mount
+  // Initialize MapLibre & DeckGL MapboxOverlay ONCE on mount
   useEffect(() => {
-    console.log('MAPVIEW_USE_EFFECT_START', { container: containerRef.current });
     if (!containerRef.current) return;
 
     let map: maplibregl.Map | null = null;
+    let overlay: MapboxOverlay | null = null;
     try {
       map = new maplibregl.Map({
         container: containerRef.current,
@@ -402,7 +360,13 @@ export default function MapView(props: MapViewProps) {
         zoom: INITIAL_VIEW_STATE.zoom,
         attributionControl: false,
       });
-      console.log('MAP_INSTANCE_CREATED:', map);
+
+      overlay = new MapboxOverlay({
+        interleaved: false,
+        layers: [],
+      });
+      map.addControl(overlay as unknown as maplibregl.IControl);
+      overlayRef.current = overlay;
     } catch (err) {
       console.error('MAP_CONSTRUCTOR_CRITICAL_ERROR:', err);
       return;
@@ -412,29 +376,21 @@ export default function MapView(props: MapViewProps) {
     (window as unknown as { __map: maplibregl.Map }).__map = map;
 
     map.on('load', () => {
-      console.log('MAP_ON_LOAD_EVENT_FIRED! isStyleLoaded:', map?.isStyleLoaded());
       setMapReady(true);
       map?.resize();
     });
 
+    const updateZoom = () => {
+      if (map) setCurrentZoom(map.getZoom());
+    };
+
+    map.on('zoom', updateZoom);
+    map.on('move', updateZoom);
+
     // Delayed resize to ensure layout is measured
     const timer = setTimeout(() => {
-      console.log('MAP_RESIZE_TIMER_RUNNING');
       map?.resize();
     }, 150);
-
-    map.on('move', () => {
-      if (!map) return;
-      if (isDeckInteractingRef.current) return;
-      const center = map.getCenter();
-      setViewState({
-        longitude: center.lng,
-        latitude: center.lat,
-        zoom: map.getZoom(),
-        pitch: map.getPitch(),
-        bearing: map.getBearing(),
-      });
-    });
 
     map.on('click', (e: maplibregl.MapLayerMouseEvent) => {
       handleCoordClickRef.current(e.lngLat.lat, e.lngLat.lng);
@@ -445,15 +401,22 @@ export default function MapView(props: MapViewProps) {
     });
 
     return () => {
-      console.log('MAP_EFFECT_CLEANUP');
       clearTimeout(timer);
+      if (overlayRef.current && map) {
+        try {
+          map.removeControl(overlayRef.current as unknown as maplibregl.IControl);
+        } catch {
+          // Ignore control removal errors on teardown
+        }
+      }
+      overlayRef.current = null;
       if (map) {
         map.remove();
       }
       mapRef.current = null;
       setMapReady(false);
     };
-  }, []); // Mount ONCE
+  }, []);
 
   // Smooth camera flying to selectedSite (e.g. from demo pins or compare chips)
   useEffect(() => {
@@ -569,11 +532,15 @@ export default function MapView(props: MapViewProps) {
             const f = e.features[0];
             const hex = String(f.properties?.h3_index || f.properties?.h3 || '');
             const score = Number(f.properties?.score_retail ?? f.properties?.score ?? 0);
+            const loc = resolveLocationName(e.lngLat.lat, e.lngLat.lng, hex);
             setHoveredCell({
               hex,
               score: Math.round(score * 10) / 10,
               x: e.point.x,
               y: e.point.y,
+              locationName: loc.name,
+              submarket: loc.submarket,
+              coordsFormatted: loc.coordsFormatted,
             });
             map.getCanvas().style.cursor = 'pointer';
           }
@@ -640,158 +607,174 @@ export default function MapView(props: MapViewProps) {
   }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
 
   // Build deck.gl layers
-  const deckLayers = [];
+  const deckLayers = useMemo(() => {
+    const layers = [];
 
-  // 1. H3 Hex Score layer (rendered with semi-transparency so satellite imagery is clear)
-  if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && displayedHexFeatures.length > 0) {
-    deckLayers.push(
-      createHexLayer({
-        data: { type: 'FeatureCollection', features: displayedHexFeatures },
-        opacity: layerOpacity?.h3_grid ?? 0.50,
-        onHover: (info: unknown) => {
-          const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
-          if (pickInfo.object?.properties) {
-            const p = pickInfo.object.properties as { h3: string; score: number };
-            setHoveredCell({
-              hex: p.h3,
-              score: p.score,
-              x: pickInfo.x ?? 0,
-              y: pickInfo.y ?? 0,
-            });
-          } else {
-            setHoveredCell(null);
-          }
-        },
-        onClick: (info: unknown) => {
-          const pickInfo = info as { coordinate?: [number, number] };
-          if (pickInfo.coordinate) {
-            handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
-          }
-        },
-      })
-    );
-  }
+    // 1. H3 Hex Score layer (rendered with semi-transparency so satellite imagery is clear)
+    if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && displayedHexFeatures.length > 0) {
+      layers.push(
+        createHexLayer({
+          data: { type: 'FeatureCollection', features: displayedHexFeatures },
+          opacity: layerOpacity?.h3_grid ?? 0.50,
+          onHover: (info: unknown) => {
+            const pickInfo = info as { object?: GeoJSON.Feature; coordinate?: [number, number]; x?: number; y?: number };
+            if (pickInfo.object?.properties) {
+              const p = pickInfo.object.properties as { h3: string; score: number };
+              const loc = resolveLocationName(
+                pickInfo.coordinate ? pickInfo.coordinate[1] : null,
+                pickInfo.coordinate ? pickInfo.coordinate[0] : null,
+                p.h3
+              );
+              setHoveredCell({
+                hex: p.h3,
+                score: p.score,
+                x: pickInfo.x ?? 0,
+                y: pickInfo.y ?? 0,
+                locationName: loc.name,
+                submarket: loc.submarket,
+                coordsFormatted: loc.coordsFormatted,
+              });
+            } else {
+              setHoveredCell(null);
+            }
+          },
+          onClick: (info: unknown) => {
+            const pickInfo = info as { coordinate?: [number, number] };
+            if (pickInfo.coordinate) {
+              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+            }
+          },
+        })
+      );
+    }
 
-  // 2. Hotspot layer
-  if (!pmtilesAvailable && props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
-    deckLayers.push(
-      createHotspotLayer({
-        data: hotspotFeatures,
-        opacity: 0.9 * (layerOpacity?.hotspots ?? 1.0),
-        onHover: (info: unknown) => {
-          const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
-          if (pickInfo.object?.properties) {
-            const p = pickInfo.object.properties as { h3: string; score: number; z: number };
-            setHoveredCell({
-              hex: p.h3,
-              score: p.score,
-              x: pickInfo.x ?? 0,
-              y: pickInfo.y ?? 0,
-            });
-          }
-        },
-        onClick: (info: unknown) => {
-          const pickInfo = info as { coordinate?: [number, number] };
-          if (pickInfo.coordinate) {
-            handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
-          }
-        },
-      })
-    );
-  }
+    // 2. Hotspot layer
+    if (!pmtilesAvailable && props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
+      layers.push(
+        createHotspotLayer({
+          data: hotspotFeatures,
+          opacity: 0.9 * (layerOpacity?.hotspots ?? 1.0),
+          onHover: (info: unknown) => {
+            const pickInfo = info as { object?: GeoJSON.Feature; coordinate?: [number, number]; x?: number; y?: number };
+            if (pickInfo.object?.properties) {
+              const p = pickInfo.object.properties as { h3: string; score: number; z: number };
+              const loc = resolveLocationName(
+                pickInfo.coordinate ? pickInfo.coordinate[1] : null,
+                pickInfo.coordinate ? pickInfo.coordinate[0] : null,
+                p.h3
+              );
+              setHoveredCell({
+                hex: p.h3,
+                score: p.score,
+                x: pickInfo.x ?? 0,
+                y: pickInfo.y ?? 0,
+                locationName: loc.name,
+                submarket: loc.submarket,
+                coordsFormatted: loc.coordsFormatted,
+              });
+            } else {
+              setHoveredCell(null);
+            }
+          },
+          onClick: (info: unknown) => {
+            const pickInfo = info as { coordinate?: [number, number] };
+            if (pickInfo.coordinate) {
+              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+            }
+          },
+        })
+      );
+    }
 
-  // 3. POIs layer (magenta diamonds for competitors + cyan circles for anchors)
-  if (props.activeLayers.includes('pois') && poiFeatures.length > 0) {
-    deckLayers.push(...createPoiLayers(poiFeatures));
-  }
+    // 3. POIs layer (magenta diamonds for competitors + cyan circles for anchors)
+    if (props.activeLayers.includes('pois') && poiFeatures.length > 0) {
+      layers.push(...createPoiLayers(poiFeatures));
+    }
 
-  // 4. Transit stops layer (white dots)
-  if (props.activeLayers.includes('transit_stops') && transitFeatures.length > 0) {
-    deckLayers.push(createTransitLayer(transitFeatures));
-  }
+    // 4. Transit stops layer (white dots)
+    if (props.activeLayers.includes('transit_stops') && transitFeatures.length > 0) {
+      layers.push(createTransitLayer(transitFeatures));
+    }
 
-  // 5. Candidate Pins
-  if (props.candidatePins && props.candidatePins.length > 0) {
-    deckLayers.push(
-      new ScatterplotLayer({
-        id: 'candidate-pins-layer',
-        data: props.candidatePins,
-        pickable: false,
-        getPosition: (d: unknown) => {
-          const pin = d as { lat: number; lon: number };
-          return [pin.lon, pin.lat];
-        },
-        getFillColor: [0, 229, 255, 255],
-        getLineColor: [255, 255, 255, 255],
-        stroked: true,
-        lineWidthMinPixels: 2,
-        radiusMinPixels: 7,
-        radiusMaxPixels: 14,
-      })
-    );
-  }
+    // 5. Candidate Pins
+    if (props.candidatePins && props.candidatePins.length > 0) {
+      layers.push(
+        new ScatterplotLayer({
+          id: 'candidate-pins-layer',
+          data: props.candidatePins,
+          pickable: false,
+          getPosition: (d: unknown) => {
+            const pin = d as { lat: number; lon: number };
+            return [pin.lon, pin.lat];
+          },
+          getFillColor: [0, 229, 255, 255],
+          getLineColor: [255, 255, 255, 255],
+          stroked: true,
+          lineWidthMinPixels: 2,
+          radiusMinPixels: 7,
+          radiusMaxPixels: 14,
+        })
+      );
+    }
 
-  // 6. Drawn search polygon visualization
-  if (drawnPolygon) {
-    deckLayers.push(
-      new GeoJsonLayer({
-        id: 'drawn-polygon-layer',
-        data: drawnPolygon,
-        pickable: false,
-        stroked: true,
-        filled: true,
-        getFillColor: [0, 229, 255, 45],
-        getLineColor: [0, 229, 255, 255],
-        getLineWidth: 2,
-        lineWidthMinPixels: 2,
-      })
-    );
-  }
+    // 6. Drawn search polygon visualization
+    if (drawnPolygon) {
+      layers.push(
+        new GeoJsonLayer({
+          id: 'drawn-polygon-layer',
+          data: drawnPolygon,
+          pickable: false,
+          stroked: true,
+          filled: true,
+          getFillColor: [0, 229, 255, 45],
+          getLineColor: [0, 229, 255, 255],
+          getLineWidth: 2,
+          lineWidthMinPixels: 2,
+        })
+      );
+    }
 
-  // 7. Active drawing vertices
-  if (drawVertices.length > 0) {
-    deckLayers.push(
-      new ScatterplotLayer({
-        id: 'draw-vertices-layer',
-        data: drawVertices,
-        pickable: false,
-        getPosition: (d: unknown) => d as [number, number],
-        getFillColor: [0, 229, 255, 255],
-        radiusMinPixels: 5,
-      })
-    );
-  }
+    // 7. Active drawing vertices
+    if (drawVertices.length > 0) {
+      layers.push(
+        new ScatterplotLayer({
+          id: 'draw-vertices-layer',
+          data: drawVertices,
+          pickable: false,
+          getPosition: (d: unknown) => d as [number, number],
+          getFillColor: [0, 229, 255, 255],
+          radiusMinPixels: 5,
+        })
+      );
+    }
+
+    return layers;
+  }, [
+    pmtilesAvailable,
+    props.activeLayers,
+    displayedHexFeatures,
+    layerOpacity,
+    hotspotFeatures,
+    poiFeatures,
+    transitFeatures,
+    props.candidatePins,
+    drawnPolygon,
+    drawVertices,
+  ]);
+
+  // Synchronize deck.gl layers into MapboxOverlay
+  useEffect(() => {
+    if (overlayRef.current) {
+      overlayRef.current.setProps({
+        layers: deckLayers,
+      });
+    }
+  }, [deckLayers]);
 
   return (
     <div className="relative w-full h-full">
-      {/* MapLibre canvas container */}
+      {/* MapLibre canvas container (DeckGL MapboxOverlay renders seamlessly locked to MapLibre's camera) */}
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
-
-      {/* deck.gl overlay with full mouse & zoom interaction */}
-      <div className="absolute inset-0 z-[1]">
-        <DeckGL
-          viewState={viewState}
-          onViewStateChange={handleViewStateChange}
-          onInteractionStateChange={handleInteractionStateChange}
-          controller={{
-            scrollZoom: { speed: 0.015, smooth: true },
-            dragPan: true,
-            dragRotate: true,
-            doubleClickZoom: true,
-            touchZoom: true,
-            touchRotate: true,
-            keyboard: true,
-          }}
-          layers={deckLayers}
-          getCursor={({ isHovering }) => (isHovering ? 'pointer' : 'default')}
-          onClick={(info) => {
-            const pickInfo = info as { coordinate?: [number, number] };
-            if (pickInfo.coordinate) {
-              handleCoordClickRef.current(pickInfo.coordinate[1], pickInfo.coordinate[0]);
-            }
-          }}
-        />
-      </div>
 
       {/* FLOATING TOP TOOLBAR: AREA NAVIGATOR + BASEMAP SWITCHER (cleanly positioned between panels) */}
       <div className="absolute top-20 left-72 z-20 flex flex-wrap items-center gap-2 max-w-[calc(100vw-700px)] select-none pointer-events-auto">
@@ -849,20 +832,18 @@ export default function MapView(props: MapViewProps) {
             <span>🛰️</span>
             <span>SATELLITE</span>
           </button>
-
           <button
             onClick={() => setBasemap('streets')}
             className={`font-mono text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
               basemap === 'streets'
-                ? 'bg-slate-900 text-white font-bold shadow-xs'
+                ? 'bg-sky-700 text-white font-bold shadow-xs'
                 : 'text-slate-700 hover:bg-slate-100 font-medium'
             }`}
-            title="Carto Positron / Voyager Street Map"
+            title="ESRI Vector Street Map"
           >
             <span>🗺️</span>
             <span>STREETS</span>
           </button>
-
           <button
             onClick={() => setBasemap('dark')}
             className={`font-mono text-xs px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -870,18 +851,18 @@ export default function MapView(props: MapViewProps) {
                 ? 'bg-slate-900 text-white font-bold shadow-xs'
                 : 'text-slate-700 hover:bg-slate-100 font-medium'
             }`}
-            title="Carto Dark Matter Canvas"
+            title="Dark Minimalist Canvas"
           >
-            <span>🌌</span>
+            <span>⬛</span>
             <span>DARK</span>
           </button>
         </div>
       </div>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip with human-readable location name */}
       {hoveredCell && (
         <div
-          className="absolute pointer-events-none z-[10] bg-white/95 backdrop-blur border border-slate-200 px-3 py-2 rounded-lg shadow-xl font-mono text-slate-800 text-xs space-y-0.5 border-l-4"
+          className="absolute pointer-events-none z-[10] bg-white/95 backdrop-blur-md border border-slate-200 px-3.5 py-2.5 rounded-xl shadow-2xl font-mono text-slate-800 text-xs space-y-1.5 border-l-4 min-w-[220px]"
           style={{
             left: `${hoveredCell.x + 14}px`,
             top: `${hoveredCell.y + 14}px`,
@@ -895,13 +876,23 @@ export default function MapView(props: MapViewProps) {
                 : '#EF4444',
           }}
         >
-          <div className="text-slate-500 text-[10px]">
-            H3: {hoveredCell.hex.length > 8 ? `${hoveredCell.hex.slice(0, 8)}…` : hoveredCell.hex}
+          <div className="flex items-start gap-1.5 font-sans font-bold text-slate-900 text-xs leading-snug">
+            <span className="text-emerald-600 text-sm leading-none mt-0.5">📍</span>
+            <div>
+              <div className="text-slate-900 font-bold">{hoveredCell.locationName}</div>
+              <div className="text-[10px] text-emerald-700 font-semibold font-mono">{hoveredCell.submarket}</div>
+            </div>
           </div>
-          <div className="font-bold flex items-center justify-between gap-3 text-slate-900">
-            <span>SITE SCORE:</span>
+
+          <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono pt-0.5">
+            <span>{hoveredCell.coordsFormatted}</span>
+            <span className="text-slate-400">H3: {hoveredCell.hex.slice(0, 7)}…</span>
+          </div>
+
+          <div className="border-t border-slate-100 pt-1.5 flex items-center justify-between gap-3 text-slate-900">
+            <span className="text-[11px] font-semibold text-slate-600 uppercase">Site Score:</span>
             <span
-              className="font-extrabold text-sm"
+              className="font-extrabold text-sm font-sans"
               style={{
                 color:
                   hoveredCell.score >= 80
@@ -913,7 +904,7 @@ export default function MapView(props: MapViewProps) {
                     : '#DC2626',
               }}
             >
-              {hoveredCell.score}
+              {hoveredCell.score} <span className="text-[10px] text-slate-400 font-normal">/ 100</span>
             </span>
           </div>
         </div>
@@ -957,7 +948,7 @@ export default function MapView(props: MapViewProps) {
         </button>
 
         <div className="font-mono text-[9px] font-semibold text-slate-500 px-1 py-0.5 border-y border-slate-200 text-center min-w-[30px]">
-          {Math.round(viewState.zoom * 10) / 10}z
+          {Math.round(currentZoom * 10) / 10}z
         </div>
 
         <button
@@ -1014,4 +1005,3 @@ export default function MapView(props: MapViewProps) {
     </div>
   );
 }
-

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { fetchScore } from '../api/client';
 import type { ScoreResponse } from '../api/types';
+import { resolveLocationName } from '../utils/locationResolver';
 
 export default function CompareModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { compareList, preset, weights } = useAppStore();
@@ -44,8 +45,9 @@ export default function CompareModal({ open, onClose }: { open: boolean; onClose
   return (
     <div className="fixed inset-0 z-50 bg-base/95 backdrop-blur flex items-center justify-center p-8">
       <div className="w-full max-w-5xl bg-panel border border-panelEdge shadow-neon-cyan flex flex-col h-full max-h-[80vh]">
-        <div className="font-mono text-neonCyan p-4 border-b border-panelEdge">
-          // SITE_COMPARISON
+        <div className="font-mono text-neonCyan p-4 border-b border-panelEdge flex items-center justify-between">
+          <span>// SITE_COMPARISON</span>
+          <button onClick={onClose} className="text-textMuted hover:text-white font-mono text-lg cursor-pointer">✕</button>
         </div>
         
         <div className="flex-1 overflow-auto p-4">
@@ -53,12 +55,16 @@ export default function CompareModal({ open, onClose }: { open: boolean; onClose
             <thead>
               <tr>
                 <th className="p-2 border-b border-panelEdge text-textMuted uppercase text-xs">Metric</th>
-                {compareList.map((site, i) => (
-                  <th key={i} className="p-2 border-b border-panelEdge text-white text-xs">
-                    Site {i + 1} <br/>
-                    <span className="text-neonCyan text-[10px]">{site.lat.toFixed(4)}, {site.lon.toFixed(4)}</span>
-                  </th>
-                ))}
+                {compareList.map((site, i) => {
+                  const loc = resolveLocationName(site.lat, site.lon);
+                  return (
+                    <th key={i} className="p-2 border-b border-panelEdge text-white text-xs">
+                      <div className="font-sans font-bold text-white text-xs">{loc.name}</div>
+                      <div className="text-neonCyan text-[10px] font-mono">{loc.submarket}</div>
+                      <span className="text-textMuted text-[10px]">{loc.coordsFormatted}</span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>

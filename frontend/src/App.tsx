@@ -7,6 +7,15 @@ import CompareTray from './components/CompareTray';
 import TerminalBoot from './components/TerminalBoot';
 import BatchResultsPanel from './components/BatchResultsPanel';
 import IsochronePanel from './components/IsochronePanel';
+import BookmarkModal from './components/BookmarkModal';
+import CollectionsView from './components/CollectionsView';
+import RequirementForm from './components/RequirementForm';
+import CompareView from './components/CompareView';
+import MethodologyView from './components/MethodologyView';
+import AuthModal from './components/AuthModal';
+import ProfileSettings from './components/ProfileSettings';
+import LandingPage from './components/LandingPage';
+import OnboardingWizard from './components/OnboardingWizard';
 import { useAppStore } from './store/useAppStore';
 import { fetchBatch } from './api/client';
 
@@ -14,14 +23,34 @@ export default function App() {
   const [booted, setBooted] = useState(false);
   const [batchResults, setBatchResults] = useState<any[]>([]);
   const [showBatch, setShowBatch] = useState(false);
-  
-  const { activeLayers, compareList, setSelectedSite, drawnPolygon, setDrawnPolygon, preset } = useAppStore();
+
+  const {
+    showLandingPage,
+    currentView,
+    activeLayers,
+    compareList,
+    setSelectedSite,
+    drawnPolygon,
+    setDrawnPolygon,
+    preset,
+  } = useAppStore();
 
   if (!booted) return <TerminalBoot onComplete={() => setBooted(true)} />;
 
+  // If user is on the landing page, display the SaaS landing page
+  if (showLandingPage) {
+    return (
+      <div className="relative w-screen h-screen overflow-y-auto bg-slate-950 font-sans">
+        <LandingPage />
+        <OnboardingWizard />
+        <AuthModal />
+      </div>
+    );
+  }
+
   const handleFindTopSites = () => {
     if (drawnPolygon) {
-      fetchBatch(drawnPolygon, preset).then(data => {
+      fetchBatch(drawnPolygon, preset).then((data) => {
         setBatchResults(data.results || []);
         setShowBatch(true);
       });
@@ -34,41 +63,78 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen bg-base text-textMain overflow-hidden">
+    <div className="relative w-screen h-screen bg-slate-100 text-textMain overflow-hidden font-sans">
+      {/* Universal Enterprise Navigation Header */}
       <TopBar />
-      
-      {drawnPolygon && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 bg-panel/80 backdrop-blur border border-panelEdge px-4 py-2 rounded-sm shadow-neon-green">
-          <span className="font-mono text-neonGreen text-xs tracking-widest">// SEARCH_ZONE READY —</span>
-          <button 
-            onClick={handleFindTopSites}
-            className="font-mono bg-neonGreen text-black text-xs font-bold px-2 py-0.5 rounded-sm hover:brightness-110"
-          >
-            [FIND TOP SITES]
-          </button>
-          <button 
-            onClick={handleClearSearch}
-            className="font-mono text-neonMagenta text-xs hover:underline"
-          >
-            CLEAR
-          </button>
+
+      {/* Main Multi-View Routing */}
+      {currentView === 'explorer' ? (
+        <>
+          {/* Active Polygon Search Notification */}
+          {drawnPolygon && (
+            <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 bg-white/95 backdrop-blur border border-slate-200 px-4 py-2 rounded-xl shadow-lg">
+              <span className="font-mono text-emerald-800 text-xs font-bold tracking-wider">
+                // SEARCH ZONE READY
+              </span>
+              <button
+                onClick={handleFindTopSites}
+                className="font-mono bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1 rounded-lg transition-colors cursor-pointer shadow-xs"
+              >
+                FIND TOP SITES
+              </button>
+              <button
+                onClick={handleClearSearch}
+                className="font-mono text-rose-600 hover:text-rose-700 text-xs font-bold cursor-pointer hover:underline"
+              >
+                CLEAR
+              </button>
+            </div>
+          )}
+
+          <IsochronePanel />
+          <BatchResultsPanel
+            results={batchResults}
+            visible={showBatch}
+            onClose={() => setShowBatch(false)}
+          />
+
+          {/* Interactive Map Core Engine */}
+          <div className="absolute inset-0 z-0">
+            <MapView
+              activeLayers={activeLayers}
+              onMapClick={(lat, lon) => setSelectedSite({ lat, lon })}
+              onPolygonDraw={(g) => setDrawnPolygon(g as GeoJSON.Polygon)}
+              candidatePins={compareList}
+            />
+          </div>
+
+          <LayerPanel />
+          <SiteScoreCard />
+          <CompareTray />
+        </>
+      ) : currentView === 'requirements' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto bg-slate-50">
+          <RequirementForm />
         </div>
-      )}
+      ) : currentView === 'collections' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto bg-slate-50">
+          <CollectionsView />
+        </div>
+      ) : currentView === 'compare' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto bg-slate-50">
+          <CompareView />
+        </div>
+      ) : currentView === 'methodology' ? (
+        <div className="relative z-10 w-full h-full overflow-y-auto bg-slate-50">
+          <MethodologyView />
+        </div>
+      ) : null}
 
-      <IsochronePanel />
-      <BatchResultsPanel results={batchResults} visible={showBatch} onClose={() => setShowBatch(false)} />
-
-      <div className="absolute inset-0 z-0">
-        <MapView
-          activeLayers={activeLayers}
-          onMapClick={(lat, lon) => setSelectedSite({ lat, lon })}
-          onPolygonDraw={(g) => setDrawnPolygon(g as GeoJSON.Polygon)}
-          candidatePins={compareList}
-        />
-      </div>
-      <LayerPanel />
-      <SiteScoreCard />
-      <CompareTray />
+      {/* Global Enterprise Modals */}
+      <OnboardingWizard />
+      <BookmarkModal />
+      <AuthModal />
+      <ProfileSettings />
     </div>
   );
 }
