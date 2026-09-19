@@ -53,7 +53,7 @@ export default function SiteScoreCard() {
 
   return (
     <>
-      <div className="absolute top-20 right-4 w-96 z-20">
+      <div className="absolute top-20 right-4 w-96 z-20 max-h-[calc(100vh-100px)] overflow-y-auto rounded-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-xl shadow-neon-green p-5 relative flex flex-col font-sans">
           <div className="absolute -top-3 left-4 bg-neonGreen text-black font-mono text-[10px] px-2 py-0.5 rounded-xs font-bold">
             // SITE_ANALYSIS
@@ -171,7 +171,7 @@ export default function SiteScoreCard() {
             </button>
             <button
               onClick={() => {
-                fetchIsochrone(selectedSite.lat, selectedSite.lon).then((data) => {
+                fetchIsochrone(selectedSite.lat, selectedSite.lon, [5, 10, 15], 'driving').then((data) => {
                   setIsochroneData(data);
                   if (!activeLayers.includes('isochrone')) {
                     toggleLayer('isochrone');
