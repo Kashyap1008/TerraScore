@@ -18,8 +18,6 @@ export async function fetchScore(lat: number, lon: number, preset: PresetName, w
   // Graceful fallback with localized coordinates
   return {
     ...MOCK_SCORE_RESPONSE,
-    lat,
-    lon,
     h3: `88268562${Math.floor(Math.abs(lat * lon * 1000) % 10000000).toString(16)}`,
     score: Math.min(96, Math.max(38, Math.round(72 + Math.sin(lat * 100) * 15 + Math.cos(lon * 100) * 10))),
     grade: 'A',

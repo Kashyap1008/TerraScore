@@ -10,10 +10,8 @@ export default function TopBar() {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 21 16z"></path>
         </svg>
-        <span className="font-mono uppercase tracking-widest text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-300 font-semibold ml-4 px-2 py-0.5 rounded-xs flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          // INDIA SPATIAL GRID
-        </span>
+        <span className="font-mono uppercase tracking-widest text-xs text-slate-900 font-bold">SITE_READINESS</span>
+        <span className="font-mono uppercase tracking-widest text-[10px] text-slate-500 ml-4 border border-slate-200 px-2 py-0.5 rounded-xs">// AUSTIN, TX</span>
       </div>
       
       <div>

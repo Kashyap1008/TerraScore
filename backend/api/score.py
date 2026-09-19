@@ -22,8 +22,8 @@ async def get_score(req: ScoreRequest, request: Request) -> Dict[str, Any]:
     if req.weights and sum(req.weights.values()) == 0:
         raise HTTPException(status_code=400, detail="weights must sum to > 0")
 
-    # 3. Check bbox (India coverage: lat 6.0 to 38.0, lon 68.0 to 98.0)
-    if not (6.0 <= req.lat <= 38.0 and 68.0 <= req.lon <= 98.0):
+    # 3. Check bbox (Austin bbox roughly from config)
+    if not (30.1 <= req.lat <= 30.5 and -98.0 <= req.lon <= -97.5):
         return {"score": None, "reason": "outside_coverage"}
 
     h3_idx = latlng_to_h3(req.lat, req.lon)

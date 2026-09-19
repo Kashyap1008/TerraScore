@@ -4,375 +4,375 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_0",
-        "name": "Rajiv Chowk Metro (Yellow/Blue)",
-        "route": "Blue & Yellow Line"
+        "id": "stop_0",
+        "name": "Metro Stop 100",
+        "route": "Route 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.2185,
-          28.6328
+          -97.7511,
+          30.2372
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_1",
-        "name": "Hauz Khas Metro (Yellow/Magenta)",
-        "route": "Magenta Line"
+        "id": "stop_1",
+        "name": "Metro Stop 101",
+        "route": "Route 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.2064,
-          28.5434
+          -97.739734,
+          30.2396
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_2",
-        "name": "Cyber City Rapid Metro",
-        "route": "Gurugram Rapid Metro"
+        "id": "stop_2",
+        "name": "Metro Stop 102",
+        "route": "Route 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.089,
-          28.493
+          -97.731463,
+          30.242
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_3",
-        "name": "Noida Sector 18 Metro",
-        "route": "Blue Line"
+        "id": "stop_3",
+        "name": "Metro Stop 103",
+        "route": "Route 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.324,
-          28.57
+          -97.750536,
+          30.2444
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_4",
-        "name": "New Delhi Railway Station (IR / Airport Express)",
-        "route": "Airport Express"
+        "id": "stop_4",
+        "name": "Metro Stop 104",
+        "route": "Route 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.221,
-          28.643
+          -97.746127,
+          30.2468
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_5",
-        "name": "Ghatkopar Metro & Suburban",
-        "route": "Line 1 & Central Railway"
+        "id": "stop_5",
+        "name": "Metro Stop 105",
+        "route": "Route 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.908,
-          19.086
+          -97.738936,
+          30.2492
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_6",
-        "name": "Andheri Metro & Western Suburban",
-        "route": "Line 1 & Western Railway"
+        "id": "stop_6",
+        "name": "Metro Stop 106",
+        "route": "Route 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.847,
-          19.119
+          -97.752218,
+          30.2516
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_7",
-        "name": "BKC Metro Station (Line 3 Aqua)",
-        "route": "Line 3 Underground"
+        "id": "stop_7",
+        "name": "Metro Stop 107",
+        "route": "Route 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.868,
-          19.066
+          -97.740472,
+          30.254
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_8",
-        "name": "Chhatrapati Shivaji Maharaj Terminus (CSMT)",
-        "route": "Harbour / Central Main"
+        "id": "stop_8",
+        "name": "Metro Stop 108",
+        "route": "Route 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.835,
-          18.94
+          -97.731143,
+          30.2564
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_9",
-        "name": "Dadar Junction Intercity Interchange",
-        "route": "Western & Central Main"
+        "id": "stop_9",
+        "name": "Metro Stop 109",
+        "route": "Route 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.842,
-          19.018
+          -97.749452,
+          30.2588
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_10",
-        "name": "Nadaprabhu Kempegowda Majestic Metro",
-        "route": "Purple & Green Line Interchange"
+        "id": "stop_10",
+        "name": "Metro Stop 110",
+        "route": "Route 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.572,
-          12.978
+          -97.745276,
+          30.2612
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_11",
-        "name": "MG Road Metro",
-        "route": "Purple Line"
+        "id": "stop_11",
+        "name": "Metro Stop 111",
+        "route": "Route 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.606,
-          12.975
+          -97.7391,
+          30.2636
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_12",
-        "name": "Indiranagar Metro",
-        "route": "Purple Line"
+        "id": "stop_12",
+        "name": "Metro Stop 112",
+        "route": "Route 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.638,
-          12.978
+          -97.753246,
+          30.266
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_13",
-        "name": "Whitefield (Kadugodi) Metro",
-        "route": "Purple Line Extension"
+        "id": "stop_13",
+        "name": "Metro Stop 113",
+        "route": "Route 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.76,
-          12.996
+          -97.741419,
+          30.2684
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_14",
-        "name": "Silk Board Multi-Modal Interchange",
-        "route": "Yellow & Blue Line"
+        "id": "stop_14",
+        "name": "Metro Stop 114",
+        "route": "Route 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.624,
-          12.917
+          -97.731138,
+          30.2708
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_15",
-        "name": "Ameerpet Metro Interchange",
-        "route": "Red & Blue Line"
+        "id": "stop_15",
+        "name": "Metro Stop 115",
+        "route": "Route 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          78.448,
-          17.437
+          -97.748499,
+          30.2732
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_16",
-        "name": "HITEC City Metro Station",
-        "route": "Blue Line"
+        "id": "stop_16",
+        "name": "Metro Stop 116",
+        "route": "Route 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          78.377,
-          17.449
+          -97.744252,
+          30.2756
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_17",
-        "name": "Raidurg Terminus",
-        "route": "Blue Line Extension"
+        "id": "stop_17",
+        "name": "Metro Stop 117",
+        "route": "Route 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          78.375,
-          17.438
+          -97.738946,
+          30.278
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_18",
-        "name": "Kalupur Railway Station Metro",
-        "route": "East-West Corridor"
+        "id": "stop_18",
+        "name": "Metro Stop 118",
+        "route": "Route 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.601,
-          23.023
+          -97.754104,
+          30.2804
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_19",
-        "name": "Thaltej Metro Station",
-        "route": "East-West Corridor"
+        "id": "stop_19",
+        "name": "Metro Stop 119",
+        "route": "Route 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.515,
-          23.051
+          -97.7425,
+          30.2828
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_20",
-        "name": "GIFT City Metro Hub",
-        "route": "Phase 2 North Extension"
+        "id": "stop_20",
+        "name": "Metro Stop 120",
+        "route": "Route 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.685,
-          23.163
+          -97.731448,
+          30.2852
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_21",
-        "name": "Puratchi Thalaivar Dr. MGR Central Metro",
-        "route": "Blue & Green Line"
+        "id": "stop_21",
+        "name": "Metro Stop 121",
+        "route": "Route 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          80.275,
-          13.082
+          -97.747753,
+          30.2876
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_22",
-        "name": "Guindy Metro Interchange",
-        "route": "Blue Line"
+        "id": "stop_22",
+        "name": "Metro Stop 122",
+        "route": "Route 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          80.212,
-          13.008
+          -97.743135,
+          30.29
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_23",
-        "name": "Salt Lake Sector V Metro",
-        "route": "Green Line (East-West)"
+        "id": "stop_23",
+        "name": "Metro Stop 123",
+        "route": "Route 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          88.431,
-          22.58
+          -97.738485,
+          30.2924
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "transit_ind_24",
-        "name": "Esplanade Metro Interchange",
-        "route": "Blue & Green Line"
+        "id": "stop_24",
+        "name": "Metro Stop 124",
+        "route": "Route 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          88.351,
-          22.564
+          -97.754722,
+          30.2948
         ]
       }
     }

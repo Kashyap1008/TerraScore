@@ -4,496 +4,880 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_0",
-        "type": "financial",
-        "category": "financial",
-        "name": "Bandra Kurla Complex (BKC)"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          72.8687,
-          19.0657
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_1",
-        "type": "transit",
-        "category": "transit",
-        "name": "Chhatrapati Shivaji Maharaj Intl Airport"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          72.8656,
-          19.0896
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_2",
-        "type": "logistics",
-        "category": "logistics",
-        "name": "Jawaharlal Nehru Port (JNPT)"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          72.95,
-          18.95
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_3",
-        "type": "retail",
+        "id": "poi_0",
+        "type": "competitor",
         "category": "retail",
-        "name": "Phoenix Marketcity Kurla"
+        "name": "Competitor Store 1"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.889,
-          19.0863
+          -97.7371,
+          30.2672
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_4",
-        "type": "tech",
-        "category": "tech",
-        "name": "Mindspace Malad Tech Hub"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          72.835,
-          19.176
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_5",
-        "type": "tech",
-        "category": "tech",
-        "name": "Navi Mumbai Infotech Corridor"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          73.0167,
-          19.0833
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_6",
-        "type": "tech",
-        "category": "tech",
-        "name": "DLF CyberCity Gurugram"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.088,
-          28.495
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_7",
-        "type": "retail",
+        "id": "poi_1",
+        "type": "competitor",
         "category": "retail",
-        "name": "Connaught Place Commercial Core"
+        "name": "Competitor Store 2"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.2167,
-          28.6315
+          -97.730733,
+          30.271045
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_8",
-        "type": "transit",
-        "category": "transit",
-        "name": "Indira Gandhi Intl Airport (DEL)"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.1,
-          28.5562
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_9",
-        "type": "tech",
-        "category": "tech",
-        "name": "Noida Electronic City SEZ"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.371,
-          28.628
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_10",
-        "type": "retail",
+        "id": "poi_2",
+        "type": "competitor",
         "category": "retail",
-        "name": "Select CITYWALK Saket"
+        "name": "Competitor Store 3"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.2185,
-          28.5284
+          -97.727685,
+          30.278335
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_11",
-        "type": "logistics",
-        "category": "logistics",
-        "name": "Farrukhnagar Multimodal Logistics Hub"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          76.82,
-          28.45
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_12",
-        "type": "tech",
-        "category": "tech",
-        "name": "Manyata Tech Park"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.62,
-          13.045
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_13",
-        "type": "tech",
-        "category": "tech",
-        "name": "Whitefield IT & Export Zone"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.7499,
-          12.9716
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_14",
-        "type": "tech",
-        "category": "tech",
-        "name": "Electronic City Phase 1"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.665,
-          12.845
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_15",
-        "type": "transit",
-        "category": "transit",
-        "name": "Kempegowda Intl Airport (BLR)"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          77.7066,
-          13.1986
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_16",
-        "type": "retail",
+        "id": "poi_3",
+        "type": "competitor",
         "category": "retail",
-        "name": "Outer Ring Road (ORR) Commercial Bellandur"
+        "name": "Competitor Store 4"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          77.68,
-          12.93
+          -97.718508,
+          30.277642
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_17",
-        "type": "tech",
-        "category": "tech",
-        "name": "HITEC City Cyber Towers"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.375,
-          17.45
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_18",
-        "type": "financial",
-        "category": "financial",
-        "name": "Gachibowli Financial District"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.348,
-          17.418
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_19",
-        "type": "transit",
-        "category": "transit",
-        "name": "Rajiv Gandhi Intl Airport (HYD)"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          78.43,
-          17.24
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_20",
-        "type": "retail",
+        "id": "poi_4",
+        "type": "competitor",
         "category": "retail",
-        "name": "Inorbit Mall Madhapur"
+        "name": "Competitor Store 5"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          78.388,
-          17.435
+          -97.719571,
+          30.288567
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_21",
-        "type": "financial",
-        "category": "financial",
-        "name": "GIFT City International FinTech Zone"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          72.684,
-          23.161
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "poi_ind_22",
-        "type": "retail",
+        "id": "poi_5",
+        "type": "competitor",
         "category": "retail",
-        "name": "SG Highway Commercial Corridor"
+        "name": "Competitor Store 6"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.505,
-          23.03
+          -97.727311,
+          30.299633
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_23",
-        "type": "logistics",
-        "category": "logistics",
-        "name": "Sanand Industrial Mega Park"
+        "id": "poi_6",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 7"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          72.38,
-          22.98
+          -97.714181,
+          30.30037
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_24",
-        "type": "tech",
-        "category": "tech",
-        "name": "OMR IT Expressway Thoraipakkam"
+        "id": "poi_7",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 8"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          80.235,
-          12.94
+          -97.741492,
+          30.272017
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_25",
-        "type": "logistics",
-        "category": "logistics",
-        "name": "Sriperumbudur Auto Cluster"
+        "id": "poi_8",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 9"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          79.94,
-          12.96
+          -97.744232,
+          30.278159
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_26",
-        "type": "transit",
-        "category": "transit",
-        "name": "Chennai Intl Airport (MAA)"
+        "id": "poi_9",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 10"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          80.17,
-          12.994
+          -97.739909,
+          30.283991
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_27",
-        "type": "tech",
-        "category": "tech",
-        "name": "Salt Lake Sector V IT Hub"
+        "id": "poi_10",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 11"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          88.433,
-          22.576
+          -97.748583,
+          30.289742
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_28",
-        "type": "financial",
-        "category": "financial",
-        "name": "New Town Commercial Center"
+        "id": "poi_11",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 12"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          88.468,
-          22.585
+          -97.761499,
+          30.291815
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_29",
-        "type": "tech",
-        "category": "tech",
-        "name": "Hinjawadi Rajiv Gandhi Infotech Park"
+        "id": "poi_12",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 13"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.725,
-          18.595
+          -97.756079,
+          30.300487
         ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "id": "poi_ind_30",
-        "type": "logistics",
-        "category": "logistics",
-        "name": "Chakan Auto Manufacturing Corridor"
+        "id": "poi_13",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 14"
       },
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.85,
-          18.76
+          -97.7737,
+          30.299305
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_14",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.748239,
+          30.269781
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_15",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 16"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.752434,
+          30.274978
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_16",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 17"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.761657,
+          30.274261
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_17",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 18"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.77063,
+          30.268837
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_18",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 19"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.776197,
+          30.276161
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_19",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 20"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.785061,
+          30.265698
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_20",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 21"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.788416,
+          30.251234
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_21",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 22"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.749026,
+          30.266418
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_22",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 23"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.754593,
+          30.26179
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_23",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 24"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.756235,
+          30.254193
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_24",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 25"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.765429,
+          30.253681
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_25",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 26"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.762328,
+          30.243029
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_26",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 27"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.752606,
+          30.233108
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_27",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 28"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.765436,
+          30.230669
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_28",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 29"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.743783,
+          30.262233
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_29",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 30"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.739925,
+          30.256523
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_30",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 31"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7431,
+          30.2502
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_31",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 32"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.733453,
+          30.245651
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_32",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 33"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.720307,
+          30.245286
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_33",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 34"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.724032,
+          30.236015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_34",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 35"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.70685,
+          30.239479
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_35",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 36"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.73754,
+          30.26532
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_36",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 37"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.732421,
+          30.260734
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_37",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 38"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.723446,
+          30.262645
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_38",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 39"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.715602,
+          30.269172
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "poi_39",
+        "type": "competitor",
+        "category": "retail",
+        "name": "Competitor Store 40"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.708728,
+          30.262663
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_0",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 1"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.735377,
+          30.271035
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_1",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.733089,
+          30.279124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_2",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.737511,
+          30.288605
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_3",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 4"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.748994,
+          30.295701
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_4",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 5"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.765614,
+          30.296816
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_5",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 6"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.750615,
+          30.271362
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_6",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 7"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.759464,
+          30.26912
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_7",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.766286,
+          30.260897
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_8",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 9"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.767303,
+          30.248309
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_9",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 10"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.760056,
+          30.234667
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_10",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 11"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.743308,
+          30.259202
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_11",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 12"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.736746,
+          30.253357
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_12",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 13"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.725503,
+          30.252097
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_13",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 14"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.713002,
+          30.25759
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "anchor_14",
+        "type": "anchor",
+        "category": "anchor",
+        "name": "Anchor Hub 15"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.70363,
+          30.270117
         ]
       }
     }
