@@ -22,6 +22,7 @@ export default function ProfileSettings() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentUser) return;
     const updated: UserProfile = {
       ...currentUser,
       name,

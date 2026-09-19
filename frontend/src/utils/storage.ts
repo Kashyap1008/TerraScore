@@ -9,6 +9,11 @@ export interface UserProfile {
   targetMetro: string;
 }
 
+export interface UserAccount extends UserProfile {
+  password: string;
+  createdAt: string;
+}
+
 export type SiteStatus = 'prospect' | 'under_review' | 'shortlisted' | 'approved' | 'rejected';
 
 export interface SavedSite {
@@ -50,7 +55,8 @@ export interface SavedComparison {
 }
 
 const STORAGE_KEYS = {
-  USER: 'terrascorer_user',
+  SESSION_USER: 'terrascorer_session_user',
+  ACCOUNTS: 'terrascorer_registered_accounts',
   COLLECTIONS: 'terrascorer_collections',
   SAVED_SITES: 'terrascorer_saved_sites',
   SAVED_COMPARISONS: 'terrascorer_saved_comparisons',
@@ -63,48 +69,143 @@ export const DEFAULT_COLLECTIONS: CollectionFolder[] = [
   { id: 'logistics_ev', name: 'EV & Logistics Corridors', description: 'Highway accessible depot sites', color: '#8B5CF6', createdAt: new Date().toISOString() },
 ];
 
-export const DEMO_USERS: UserProfile[] = [
+export const DEMO_USERS: UserAccount[] = [
   {
     id: 'user_1',
     name: 'Sarah Chen',
     email: 'sarah.chen@apexretail.io',
+    password: 'password123',
     role: 'Director of Real Estate & Expansion',
     organization: 'Apex Retail Capital',
     defaultPreset: 'retail',
     targetMetro: 'Austin, TX',
+    createdAt: '2026-01-15T08:30:00.000Z',
   },
   {
     id: 'user_2',
     name: 'Marcus Vance',
     email: 'm.vance@nexusev.com',
+    password: 'password123',
     role: 'Infrastructure Strategy Lead',
     organization: 'Nexus EV Network',
     defaultPreset: 'ev',
     targetMetro: 'Austin, TX',
+    createdAt: '2026-02-10T11:15:00.000Z',
   },
   {
     id: 'user_3',
     name: 'Elena Rostova',
     email: 'elena@logispeed.com',
+    password: 'password123',
     role: 'Senior Site Selection Analyst',
     organization: 'LogiSpeed Fulfillment',
     defaultPreset: 'warehouse',
     targetMetro: 'Austin, TX',
+    createdAt: '2026-03-01T14:45:00.000Z',
   },
 ];
 
-export function loadUser(): UserProfile {
+export function loadAccounts(): UserAccount[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.USER);
-    if (raw) return JSON.parse(raw);
+    const raw = localStorage.getItem(STORAGE_KEYS.ACCOUNTS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
   } catch {}
-  return DEMO_USERS[0];
+  return DEMO_USERS;
 }
 
-export function saveUser(user: UserProfile) {
+export function saveAccounts(accounts: UserAccount[]) {
   try {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.ACCOUNTS, JSON.stringify(accounts));
   } catch {}
+}
+
+export function registerAccount(
+  accountData: Omit<UserAccount, 'id' | 'createdAt'>
+): { success: boolean; error?: string; user?: UserProfile } {
+  const accounts = loadAccounts();
+  const emailNorm = accountData.email.trim().toLowerCase();
+
+  if (!emailNorm) {
+    return { success: false, error: 'Email address is required.' };
+  }
+  if (accounts.some((a) => a.email.toLowerCase() === emailNorm)) {
+    return { success: false, error: 'An account with this work email already exists.' };
+  }
+  if (!accountData.password || accountData.password.length < 6) {
+    return { success: false, error: 'Password must be at least 6 characters long.' };
+  }
+
+  const newAccount: UserAccount = {
+    ...accountData,
+    id: `usr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    email: emailNorm,
+    createdAt: new Date().toISOString(),
+  };
+
+  const nextAccounts = [...accounts, newAccount];
+  saveAccounts(nextAccounts);
+
+  const { password: _, ...userProfile } = newAccount;
+  saveSessionUser(userProfile);
+  return { success: true, user: userProfile };
+}
+
+export function authenticateUser(
+  email: string,
+  password: string
+): { success: boolean; error?: string; user?: UserProfile } {
+  const accounts = loadAccounts();
+  const emailNorm = email.trim().toLowerCase();
+
+  if (!emailNorm || !password) {
+    return { success: false, error: 'Email and password are required.' };
+  }
+
+  const account = accounts.find((a) => a.email.toLowerCase() === emailNorm);
+  if (!account) {
+    return { success: false, error: 'No account found with this email address.' };
+  }
+
+  if (account.password !== password) {
+    return { success: false, error: 'Invalid password. Please check your credentials.' };
+  }
+
+  const { password: _, ...userProfile } = account;
+  saveSessionUser(userProfile);
+  return { success: true, user: userProfile };
+}
+
+export function loadSessionUser(): UserProfile | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.SESSION_USER);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
+export function saveSessionUser(user: UserProfile | null) {
+  try {
+    if (user) {
+      localStorage.setItem(STORAGE_KEYS.SESSION_USER, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.SESSION_USER);
+    }
+  } catch {}
+}
+
+export function clearSession() {
+  saveSessionUser(null);
+}
+
+export function loadUser(): UserProfile | null {
+  return loadSessionUser();
+}
+
+export function saveUser(user: UserProfile | null) {
+  saveSessionUser(user);
 }
 
 export function loadCollections(): CollectionFolder[] {

@@ -31,11 +31,34 @@ export function computeShapExplainer(
   const netDelta = Math.round((score - baseValue) * 10) / 10;
 
   // Expected baseline factor raw average is ~0.50
-  const shapFactors: ShapFactor[] = factors.map((f) => {
-    // Relative shift from neutral 0.50
-    const rawDelta = f.raw - 0.50;
-    // Scaled contribution points roughly proportional to final score
-    const points = Math.round(rawDelta * 36 * 10) / 10;
+  let preliminaryPoints = factors.map((f) => (f.raw - 0.50) * 36);
+  
+  const sumPoints = preliminaryPoints.reduce((acc, p) => acc + p, 0);
+  const diff = netDelta - sumPoints;
+  const sumAbs = preliminaryPoints.reduce((acc, p) => acc + Math.abs(p), 0);
+
+  if (sumAbs > 0) {
+    preliminaryPoints = preliminaryPoints.map(p => p + diff * (Math.abs(p) / sumAbs));
+  } else {
+    preliminaryPoints = preliminaryPoints.map(p => p + diff / factors.length);
+  }
+
+  const finalPoints = preliminaryPoints.map(p => Math.round(p * 10) / 10);
+  const finalSum = finalPoints.reduce((acc, p) => acc + p, 0);
+  const roundingError = Math.round((netDelta - finalSum) * 10) / 10;
+  
+  if (finalPoints.length > 0 && Math.abs(roundingError) > 0.01) {
+    let maxIdx = 0;
+    for (let i = 1; i < finalPoints.length; i++) {
+      if (Math.abs(finalPoints[i]) > Math.abs(finalPoints[maxIdx])) {
+        maxIdx = i;
+      }
+    }
+    finalPoints[maxIdx] = Math.round((finalPoints[maxIdx] + roundingError) * 10) / 10;
+  }
+
+  const shapFactors: ShapFactor[] = factors.map((f, i) => {
+    const points = finalPoints[i];
     const isPos = points >= 0;
     const absPts = Math.abs(points);
 

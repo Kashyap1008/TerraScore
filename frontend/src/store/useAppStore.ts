@@ -21,6 +21,7 @@ export const WEIGHTS_BY_PRESET = {
 };
 
 export type AppView = 'explorer' | 'requirements' | 'collections' | 'compare' | 'methodology';
+export type AuthView = 'login' | 'register' | null;
 
 export interface AppState {
   // Navigation & Landing Page State
@@ -28,8 +29,11 @@ export interface AppState {
   setCurrentView: (view: AppView) => void;
   showLandingPage: boolean;
   setShowLandingPage: (show: boolean) => void;
+  authView: AuthView;
+  setAuthView: (view: AuthView) => void;
   isOnboardingOpen: boolean;
   setIsOnboardingOpen: (open: boolean) => void;
+  login: (user: UserProfile) => void;
   logout: () => void;
 
   // Preset & Map Explorer State
@@ -44,7 +48,7 @@ export interface AppState {
   flyTo: { lat: number; lon: number; zoom?: number } | null;
 
   // Enterprise User & Collections State
-  currentUser: UserProfile;
+  currentUser: UserProfile | null;
   collections: CollectionFolder[];
   savedSites: SavedSite[];
   savedComparisons: SavedComparison[];
@@ -67,7 +71,7 @@ export interface AppState {
   setFlyTo: (f: AppState['flyTo']) => void;
 
   // Enterprise Actions
-  setCurrentUser: (user: UserProfile) => void;
+  setCurrentUser: (user: UserProfile | null) => void;
   addCollection: (name: string, description?: string, color?: string) => void;
   deleteCollection: (id: string) => void;
   saveSiteToCollection: (site: Omit<SavedSite, 'id' | 'createdAt'>) => void;
@@ -82,12 +86,32 @@ export interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   currentView: 'explorer',
-  setCurrentView: (view) => set({ currentView: view, showLandingPage: false }),
-  showLandingPage: true, // Landing page is the initial entry point
-  setShowLandingPage: (show) => set({ showLandingPage: show }),
+  setCurrentView: (view) => set({ currentView: view, showLandingPage: false, authView: null }),
+  showLandingPage: !loadUser(), // Show landing page if no active session
+  setShowLandingPage: (show) => set({ showLandingPage: show, authView: null }),
+  authView: null,
+  setAuthView: (view) => set({ authView: view, showLandingPage: false }),
   isOnboardingOpen: false,
   setIsOnboardingOpen: (open) => set({ isOnboardingOpen: open }),
-  logout: () => set({ showLandingPage: true, currentView: 'explorer', selectedSite: null }),
+  login: (user) => {
+    saveUser(user);
+    set({
+      currentUser: user,
+      authView: null,
+      showLandingPage: false,
+      currentView: 'explorer',
+    });
+  },
+  logout: () => {
+    saveUser(null as any);
+    set({
+      currentUser: null,
+      showLandingPage: true,
+      authView: null,
+      currentView: 'explorer',
+      selectedSite: null,
+    });
+  },
 
   preset: 'retail',
   activeLayers: ['h3_grid', 'roads'],
