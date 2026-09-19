@@ -8,6 +8,7 @@ export default function TopBar() {
     compareList,
     savedSites,
     currentUser,
+    setAuthView,
     setIsAuthModalOpen,
     setIsProfileModalOpen,
     setShowLandingPage,
@@ -128,7 +129,7 @@ export default function TopBar() {
             </button>
           ) : (
             <button
-              onClick={() => setIsAuthModalOpen(true)}
+              onClick={() => setAuthView('login')}
               className="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white font-mono text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <span>🔐 Sign In</span>

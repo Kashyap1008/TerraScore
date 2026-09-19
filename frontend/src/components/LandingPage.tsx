@@ -2,13 +2,10 @@ import React from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 export default function LandingPage() {
-  const {
-    setIsAuthModalOpen,
-    setIsOnboardingOpen,
-  } = useAppStore();
+  const { setAuthView, setIsOnboardingOpen } = useAppStore();
 
   const handleGetStarted = () => {
-    setIsOnboardingOpen(true);
+    setAuthView('register');
   };
 
   return (
@@ -65,7 +62,7 @@ export default function LandingPage() {
         {/* Auth & Launch CTA Buttons */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => setAuthView('login')}
             className="px-4 py-2 text-xs font-mono font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
           >
             Sign In
@@ -108,7 +105,7 @@ export default function LandingPage() {
           </button>
 
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => setAuthView('login')}
             className="w-full sm:w-auto px-7 py-4 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-white font-mono text-sm font-bold uppercase rounded-2xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 hover:border-slate-500"
           >
             <span>🔐 SIGN IN TO WORKSPACE</span>
@@ -287,7 +284,7 @@ export default function LandingPage() {
             Create Your Account &rarr;
           </button>
           <button
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => setAuthView('login')}
             className="px-7 py-4 bg-slate-900 hover:bg-slate-800 text-white font-mono text-sm font-bold uppercase rounded-2xl border border-slate-700 transition-all cursor-pointer"
           >
             Sign In to Workspace

@@ -14,6 +14,8 @@ import CompareView from './components/CompareView';
 import MethodologyView from './components/MethodologyView';
 import AuthModal from './components/AuthModal';
 import ProfileSettings from './components/ProfileSettings';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
 import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
 import { useAppStore } from './store/useAppStore';
@@ -26,6 +28,8 @@ export default function App() {
 
   const {
     showLandingPage,
+    authView,
+    currentUser,
     currentView,
     activeLayers,
     compareList,
@@ -37,15 +41,29 @@ export default function App() {
 
   if (!booted) return <TerminalBoot onComplete={() => setBooted(true)} />;
 
-  // If user is on the landing page, display the SaaS landing page
+  // 1. Dedicated Full-Page Login View
+  if (authView === 'login') {
+    return <LoginPage />;
+  }
+
+  // 2. Dedicated Full-Page Registration View
+  if (authView === 'register') {
+    return <RegisterPage />;
+  }
+
+  // 3. SaaS Landing Page (Unauthenticated Entry Point)
   if (showLandingPage) {
     return (
       <div className="relative w-screen h-screen overflow-y-auto bg-slate-950 font-sans">
         <LandingPage />
         <OnboardingWizard />
-        <AuthModal />
       </div>
     );
+  }
+
+  // 4. Authentication Guard: Redirect to Login if unauthenticated
+  if (!currentUser) {
+    return <LoginPage />;
   }
 
   const handleFindTopSites = () => {
