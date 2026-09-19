@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapboxOverlay } from '@deck.gl/mapbox';
-import { ScatterplotLayer, GeoJsonLayer } from '@deck.gl/layers';
+import { ScatterplotLayer, GeoJsonLayer, PathLayer } from '@deck.gl/layers';
 import { Protocol } from 'pmtiles';
 import { createHexLayer } from '../layers/hexLayer';
 import { addRoadLayer, removeRoadLayer } from '../layers/roadLayer';
@@ -175,6 +175,10 @@ export default function MapView(props: MapViewProps) {
   // Drawing state
   const [drawing, setDrawing] = useState(false);
   const [drawVertices, setDrawVertices] = useState<[number, number][]>([]);
+  // Whether the user is currently holding mouse button to draw
+  const isLassoingRef = useRef(false);
+  // Throttle mousemove to avoid too many state updates
+  const lastMoveTimeRef = useRef(0);
 
   useEffect(() => {
     onMapClickRef.current = props.onMapClick;
@@ -186,32 +190,51 @@ export default function MapView(props: MapViewProps) {
     drawVerticesRef.current = drawVertices;
   }, [drawing, drawVertices]);
 
-  // Handle map clicks (normal or drawing vertices)
+  // Handle map clicks (normal mode only — drawing is now freehand lasso)
   const handleCoordClickRef = useRef<(lat: number, lon: number) => void>(() => {});
 
   const handleCoordClick = (lat: number, lon: number) => {
-    if (drawingRef.current) {
-      const next: [number, number][] = [...drawVerticesRef.current, [lon, lat]];
-      if (next.length >= 3) {
-        const ring: [number, number][] = [next[0], next[1], next[2], next[0]];
-        const poly: GeoJSON.Polygon = {
-          type: 'Polygon',
-          coordinates: [ring],
-        };
-        setDrawing(false);
-        setDrawVertices([]);
-        setDrawnPolygon(poly);
-        onPolygonDrawRef.current(poly);
-      } else {
-        setDrawVertices(next);
-      }
-    } else {
+    if (!drawingRef.current) {
       onMapClickRef.current(lat, lon);
     }
+    // In drawing mode clicks are ignored — freehand drag is used instead
   };
   useEffect(() => {
     handleCoordClickRef.current = handleCoordClick;
   });
+
+  // Finalize the lasso polygon from accumulated vertices
+  const finalizeLasso = useCallback(() => {
+    const verts = drawVerticesRef.current;
+    if (verts.length < 3) {
+      // Not enough points — cancel silently
+      setDrawing(false);
+      setDrawVertices([]);
+      isLassoingRef.current = false;
+      return;
+    }
+    // Close the ring
+    const ring: [number, number][] = [...verts, verts[0]];
+    const poly: GeoJSON.Polygon = { type: 'Polygon', coordinates: [ring] };
+    setDrawing(false);
+    setDrawVertices([]);
+    isLassoingRef.current = false;
+    setDrawnPolygon(poly);
+    onPolygonDrawRef.current(poly);
+  }, [setDrawnPolygon]);
+
+  // Keep a ref to finalizeLasso so the map effect closure can call the latest version
+  const finalizeLassoRef = useRef(finalizeLasso);
+  useEffect(() => {
+    finalizeLassoRef.current = finalizeLasso;
+  }, [finalizeLasso]);
+
+  // Change cursor to crosshair when in drawing mode
+  useEffect(() => {
+    const canvas = mapRef.current?.getCanvas();
+    if (!canvas) return;
+    canvas.style.cursor = drawing ? 'crosshair' : '';
+  }, [drawing]);
 
   // Check PMTiles manifest & load fallback datasets on mount
   useEffect(() => {
@@ -396,12 +419,60 @@ export default function MapView(props: MapViewProps) {
       handleCoordClickRef.current(e.lngLat.lat, e.lngLat.lng);
     });
 
+    // Freehand lasso: attach native canvas events (not MapLibre events)
+    const canvas = map.getCanvas();
+
+    const onCanvasMouseDown = (e: MouseEvent) => {
+      if (!drawingRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      isLassoingRef.current = true;
+      // Disable MapLibre drag/scroll so the map doesn't pan during drawing
+      map.dragPan.disable();
+      map.scrollZoom.disable();
+      // Record first point
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const ll = map.unproject([px, py]);
+      drawVerticesRef.current = [[ll.lng, ll.lat]];
+      setDrawVertices([[ll.lng, ll.lat]]);
+    };
+
+    const onCanvasMouseMove = (e: MouseEvent) => {
+      if (!drawingRef.current || !isLassoingRef.current) return;
+      const now = performance.now();
+      if (now - lastMoveTimeRef.current < 30) return; // ~30fps throttle
+      lastMoveTimeRef.current = now;
+      const rect = canvas.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      const py = e.clientY - rect.top;
+      const ll = map.unproject([px, py]);
+      const next: [number, number][] = [...drawVerticesRef.current, [ll.lng, ll.lat]];
+      drawVerticesRef.current = next;
+      setDrawVertices(next);
+    };
+
+    const onCanvasMouseUp = () => {
+      if (!drawingRef.current || !isLassoingRef.current) return;
+      map.dragPan.enable();
+      map.scrollZoom.enable();
+      finalizeLassoRef.current();
+    };
+
+    canvas.addEventListener('mousedown', onCanvasMouseDown);
+    canvas.addEventListener('mousemove', onCanvasMouseMove);
+    canvas.addEventListener('mouseup', onCanvasMouseUp);
+
     map.on('error', (e) => {
       console.warn('MapLibre internal notice:', e);
     });
 
     return () => {
       clearTimeout(timer);
+      canvas.removeEventListener('mousedown', onCanvasMouseDown);
+      canvas.removeEventListener('mousemove', onCanvasMouseMove);
+      canvas.removeEventListener('mouseup', onCanvasMouseUp);
       if (overlayRef.current && map) {
         try {
           map.removeControl(overlayRef.current as unknown as maplibregl.IControl);
@@ -416,6 +487,7 @@ export default function MapView(props: MapViewProps) {
       mapRef.current = null;
       setMapReady(false);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Smooth camera flying to selectedSite (e.g. from demo pins or compare chips)
@@ -731,16 +803,36 @@ export default function MapView(props: MapViewProps) {
       );
     }
 
-    // 7. Active drawing vertices
+    // 7. Live lasso path while drawing (PathLayer for the trace + dot for start point)
+    if (drawVertices.length > 1) {
+      layers.push(
+        new PathLayer({
+          id: 'draw-lasso-path-layer',
+          data: [drawVertices],
+          pickable: false,
+          getPath: (d: unknown) => d as [number, number][],
+          getColor: [0, 229, 255, 220],
+          getWidth: 2,
+          widthMinPixels: 2,
+          widthMaxPixels: 4,
+          jointRounded: true,
+          capRounded: true,
+        })
+      );
+    }
+    // Start-point anchor dot
     if (drawVertices.length > 0) {
       layers.push(
         new ScatterplotLayer({
-          id: 'draw-vertices-layer',
-          data: drawVertices,
+          id: 'draw-start-dot-layer',
+          data: [drawVertices[0]],
           pickable: false,
           getPosition: (d: unknown) => d as [number, number],
           getFillColor: [0, 229, 255, 255],
-          radiusMinPixels: 5,
+          getLineColor: [255, 255, 255, 255],
+          stroked: true,
+          lineWidthMinPixels: 2,
+          radiusMinPixels: 6,
         })
       );
     }
@@ -982,6 +1074,12 @@ export default function MapView(props: MapViewProps) {
       <DrawTool
         drawing={drawing}
         onToggleDrawing={() => {
+          // Re-enable map controls in case they were disabled mid-lasso
+          if (mapRef.current && isLassoingRef.current) {
+            mapRef.current.dragPan.enable();
+            mapRef.current.scrollZoom.enable();
+          }
+          isLassoingRef.current = false;
           setDrawing((prev) => !prev);
           setDrawVertices([]);
         }}

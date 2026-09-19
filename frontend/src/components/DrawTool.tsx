@@ -6,6 +6,7 @@ export interface DrawToolProps {
   onToggleDrawing: () => void;
   hasPolygon: boolean;
   onClearPolygon: () => void;
+  /** Number of lasso points collected so far during active drawing */
   vertexCount?: number;
 }
 
@@ -37,12 +38,20 @@ export default function DrawTool({
             ? 'bg-sky-600 text-white border-sky-600 font-bold shadow-md animate-pulse'
             : 'bg-white/95 backdrop-blur text-sky-700 border-sky-300 hover:bg-sky-50 hover:border-sky-400 font-medium'
         }`}
+        title={drawing ? 'Release mouse to finish shape · ESC to cancel' : 'Click then hold & drag to draw a custom zone'}
       >
-        <span>{drawing ? `DRAWING (${vertexCount}/3)` : 'DRAW ZONE'}</span>
-        {drawing && (
-          <span className="text-[10px] opacity-90 font-normal ml-1">
-            [ESC TO CANCEL]
-          </span>
+        {drawing ? (
+          <>
+            <span>✏️ DRAWING</span>
+            {vertexCount > 0 && (
+              <span className="text-[10px] opacity-90 font-normal bg-white/20 px-1 py-0.5 rounded">
+                {vertexCount}pts
+              </span>
+            )}
+            <span className="text-[10px] opacity-75 font-normal ml-0.5">[HOLD &amp; DRAG · ESC=CANCEL]</span>
+          </>
+        ) : (
+          <span>✏️ DRAW ZONE</span>
         )}
       </button>
 
