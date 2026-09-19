@@ -1,1 +1,297 @@
-{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"name":"Interstate 35","class":"motorway"},"geometry":{"type":"LineString","coordinates":[[-97.78,30.12],[-97.768,30.175],[-97.752,30.23],[-97.74,30.267],[-97.728,30.3],[-97.7,30.35],[-97.68,30.41],[-97.67,30.47],[-97.66,30.52]]}},{"type":"Feature","properties":{"name":"Loop 1 (MoPac)","class":"motorway"},"geometry":{"type":"LineString","coordinates":[[-97.86,30.18],[-97.825,30.225],[-97.79,30.27],[-97.76,30.31],[-97.738,30.36],[-97.72,30.41],[-97.7,30.44]]}},{"type":"Feature","properties":{"name":"US-183 (Research Blvd)","class":"trunk"},"geometry":{"type":"LineString","coordinates":[[-97.82,30.46],[-97.76,30.41],[-97.71,30.36],[-97.68,30.32],[-97.685,30.27],[-97.68,30.22],[-97.67,30.19]]}},{"type":"Feature","properties":{"name":"TX-71 / Ben White Blvd","class":"trunk"},"geometry":{"type":"LineString","coordinates":[[-97.87,30.235],[-97.81,30.233],[-97.76,30.225],[-97.72,30.215],[-97.66,30.2],[-97.61,30.19]]}},{"type":"Feature","properties":{"name":"Loop 360","class":"primary"},"geometry":{"type":"LineString","coordinates":[[-97.81,30.233],[-97.815,30.26],[-97.8,30.3],[-97.785,30.34],[-97.75,30.38],[-97.725,30.4]]}},{"type":"Feature","properties":{"name":"US-290 East","class":"trunk"},"geometry":{"type":"LineString","coordinates":[[-97.71,30.32],[-97.66,30.335],[-97.61,30.355],[-97.55,30.37]]}},{"type":"Feature","properties":{"name":"Congress Avenue","class":"primary"},"geometry":{"type":"LineString","coordinates":[[-97.765,30.2],[-97.755,30.24],[-97.743,30.267],[-97.74,30.28]]}},{"type":"Feature","properties":{"name":"Lamar Boulevard","class":"primary"},"geometry":{"type":"LineString","coordinates":[[-97.795,30.22],[-97.765,30.25],[-97.75,30.28],[-97.725,30.34],[-97.695,30.4]]}}]}
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Delhi-Mumbai Expressway (NE-4)",
+        "class": "motorway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.05,
+            28.45
+          ],
+          [
+            76.85,
+            27.8
+          ],
+          [
+            76.25,
+            26.9
+          ],
+          [
+            75.8,
+            25.1
+          ],
+          [
+            74.5,
+            23.3
+          ],
+          [
+            73.2,
+            21.2
+          ],
+          [
+            72.9,
+            19.25
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mumbai-Pune Expressway",
+        "class": "motorway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            73.02,
+            19.02
+          ],
+          [
+            73.18,
+            18.9
+          ],
+          [
+            73.4,
+            18.75
+          ],
+          [
+            73.65,
+            18.68
+          ],
+          [
+            73.8,
+            18.55
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Western Express Highway (Mumbai)",
+        "class": "primary"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            72.84,
+            19.05
+          ],
+          [
+            72.85,
+            19.1
+          ],
+          [
+            72.86,
+            19.18
+          ],
+          [
+            72.86,
+            19.25
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Eastern Freeway (Mumbai)",
+        "class": "primary"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            72.83,
+            18.94
+          ],
+          [
+            72.86,
+            19
+          ],
+          [
+            72.89,
+            19.05
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Outer Ring Road (Delhi)",
+        "class": "trunk"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.1,
+            28.65
+          ],
+          [
+            77.15,
+            28.55
+          ],
+          [
+            77.25,
+            28.54
+          ],
+          [
+            77.3,
+            28.62
+          ],
+          [
+            77.2,
+            28.72
+          ],
+          [
+            77.1,
+            28.65
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bengaluru Outer Ring Road (ORR)",
+        "class": "trunk"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            77.55,
+            13.02
+          ],
+          [
+            77.62,
+            13.04
+          ],
+          [
+            77.68,
+            12.98
+          ],
+          [
+            77.69,
+            12.92
+          ],
+          [
+            77.62,
+            12.91
+          ],
+          [
+            77.56,
+            12.92
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hyderabad Nehru Outer Ring Road (ORR)",
+        "class": "motorway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            78.3,
+            17.45
+          ],
+          [
+            78.4,
+            17.6
+          ],
+          [
+            78.6,
+            17.45
+          ],
+          [
+            78.5,
+            17.25
+          ],
+          [
+            78.35,
+            17.3
+          ],
+          [
+            78.3,
+            17.45
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "SG Highway (Ahmedabad - Gandhinagar)",
+        "class": "primary"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            72.5,
+            22.98
+          ],
+          [
+            72.51,
+            23.04
+          ],
+          [
+            72.53,
+            23.1
+          ],
+          [
+            72.57,
+            23.18
+          ],
+          [
+            72.63,
+            23.22
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Old Mahabalipuram Road (OMR / IT Corridor Chennai)",
+        "class": "primary"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            80.25,
+            13
+          ],
+          [
+            80.24,
+            12.94
+          ],
+          [
+            80.23,
+            12.87
+          ],
+          [
+            80.22,
+            12.8
+          ]
+        ]
+      }
+    }
+  ]
+}

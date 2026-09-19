@@ -4,50 +4,38 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "fz_1",
+        "id": "fz_mithi",
         "zone": "AE",
         "risk": "high",
-        "label": "FEMA 100-yr Lady Bird Lake Corridor"
+        "label": "Mithi River Monsoon Flood Buffer (Mumbai)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -97.77,
-              30.262
+              72.87,
+              19.06
             ],
             [
-              -97.755,
-              30.26
+              72.88,
+              19.07
             ],
             [
-              -97.738,
-              30.252
+              72.89,
+              19.08
             ],
             [
-              -97.725,
-              30.25
+              72.885,
+              19.09
             ],
             [
-              -97.726,
-              30.243
+              72.875,
+              19.075
             ],
             [
-              -97.742,
-              30.247
-            ],
-            [
-              -97.758,
-              30.253
-            ],
-            [
-              -97.772,
-              30.256
-            ],
-            [
-              -97.77,
-              30.262
+              72.87,
+              19.06
             ]
           ]
         ]
@@ -56,46 +44,46 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "fz_2",
-        "zone": "A",
+        "id": "fz_yamuna",
+        "zone": "AE",
         "risk": "high",
-        "label": "Shoal Creek Drainage Tributary"
+        "label": "Yamuna Floodplain Wetland Corridor (Delhi)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -97.756,
-              30.285
+              77.24,
+              28.7
             ],
             [
-              -97.751,
-              30.278
+              77.26,
+              28.66
             ],
             [
-              -97.75,
-              30.267
+              77.28,
+              28.6
             ],
             [
-              -97.746,
-              30.262
+              77.3,
+              28.55
             ],
             [
-              -97.752,
-              30.261
+              77.28,
+              28.55
             ],
             [
-              -97.755,
-              30.27
+              77.25,
+              28.62
             ],
             [
-              -97.758,
-              30.282
+              77.23,
+              28.7
             ],
             [
-              -97.756,
-              30.285
+              77.24,
+              28.7
             ]
           ]
         ]
@@ -104,34 +92,70 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "fz_3",
-        "zone": "X500",
-        "risk": "medium",
-        "label": "East Austin Buffer Basin"
+        "id": "fz_bellandur",
+        "zone": "AE",
+        "risk": "high",
+        "label": "Bellandur & Varthur Lake Wetland Basin (Bengaluru)"
       },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
           [
             [
-              -97.73,
-              30.268
+              77.66,
+              12.93
             ],
             [
-              -97.718,
-              30.267
+              77.72,
+              12.95
             ],
             [
-              -97.715,
-              30.255
+              77.74,
+              12.94
             ],
             [
-              -97.727,
-              30.257
+              77.7,
+              12.92
             ],
             [
-              -97.73,
-              30.268
+              77.66,
+              12.93
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "fz_cooum",
+        "zone": "AE",
+        "risk": "high",
+        "label": "Adyar & Cooum Coastal Inundation Zone (Chennai)"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.24,
+              13.01
+            ],
+            [
+              80.28,
+              13.01
+            ],
+            [
+              80.27,
+              12.99
+            ],
+            [
+              80.23,
+              12.99
+            ],
+            [
+              80.24,
+              13.01
             ]
           ]
         ]

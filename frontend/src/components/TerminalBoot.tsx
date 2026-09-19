@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 
 const BOOT_LINES = [
   "> initializing geospatial engine...",
-  "> loading H3 grid [austin, tx]...",
-  "> compiling spatial indexes...",
+  "> loading India H3 grid [national & metro corridors]...",
+  "> compiling spatial indexes [states & districts]...",
   "> connecting to routing service...",
   "> READY."
 ];

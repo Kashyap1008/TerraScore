@@ -2,6 +2,9 @@ export interface ScoreResponse {
   h3: string; 
   score: number; 
   grade: string;
+  lat?: number;
+  lon?: number;
+  preset?: string;
   factors: { key: string; label: string; raw: number; weight: number; contribution: number; explanation: string }[];
   flags: { type: string; severity: string; text: string }[];
   archetype: string;

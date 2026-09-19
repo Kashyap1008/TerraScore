@@ -13,7 +13,7 @@ import { createHotspotLayer } from '../layers/hotspotLayer';
 import { addIsoLayers, removeIsoLayers } from '../layers/isoLayer';
 import DrawTool from './DrawTool';
 import { useAppStore } from '../store/useAppStore';
-import { AUSTIN_AREAS, type AustinArea } from '../config/austinAreas';
+import { INDIA_AREAS, type IndiaArea } from '../config/indiaAreas';
 
 export interface MapViewProps {
   activeLayers: string[];
@@ -126,9 +126,9 @@ const mapStyle: maplibregl.StyleSpecification = {
 };
 
 const INITIAL_VIEW_STATE = {
-  longitude: -97.7431,
-  latitude: 30.2672,
-  zoom: 11,
+  longitude: 78.9629,
+  latitude: 22.5937,
+  zoom: 4.8,
   pitch: 0,
   bearing: 0,
 };
@@ -164,7 +164,7 @@ export default function MapView(props: MapViewProps) {
 
   // Basemap & Area State
   const [basemap, setBasemap] = useState<BasemapMode>('satellite');
-  const [selectedAreaId, setSelectedAreaId] = useState<string>('all');
+  const [selectedAreaId, setSelectedAreaId] = useState<string>('all_india');
   const [filterByArea, setFilterByArea] = useState<boolean>(false);
 
   // Drawing state
@@ -288,24 +288,24 @@ export default function MapView(props: MapViewProps) {
   // Filter features if area filter is active
   const displayedHexFeatures = useMemo(() => {
     if (!scoresGeojson?.features) return [];
-    if (selectedAreaId === 'all' || !filterByArea) {
+    if (selectedAreaId === 'all_india' || !filterByArea) {
       return scoresGeojson.features;
     }
-    const area = AUSTIN_AREAS.find((a) => a.id === selectedAreaId);
+    const area = INDIA_AREAS.find((a) => a.id === selectedAreaId);
     if (!area) return scoresGeojson.features;
     const [aLon, aLat] = area.center;
-    // Area radius ~0.045 deg (~5km)
+    // Regional Metro radius ~0.35 deg (~38km)
     return scoresGeojson.features.filter((f) => {
       const coords = (f.geometry as GeoJSON.Polygon)?.coordinates?.[0]?.[0];
       if (!coords) return false;
       const dLon = coords[0] - aLon;
       const dLat = coords[1] - aLat;
-      return Math.sqrt(dLon * dLon + dLat * dLat) <= 0.045;
+      return Math.sqrt(dLon * dLon + dLat * dLat) <= 0.35;
     });
   }, [scoresGeojson, selectedAreaId, filterByArea]);
 
   // Handle Area Selection & Camera Flight
-  const handleSelectArea = (area: AustinArea) => {
+  const handleSelectArea = (area: IndiaArea) => {
     setSelectedAreaId(area.id);
     const map = mapRef.current;
     if (map) {
@@ -377,7 +377,7 @@ export default function MapView(props: MapViewProps) {
   };
 
   const handleResetMetro = () => {
-    setSelectedAreaId('all');
+    setSelectedAreaId('all_india');
     setViewState(INITIAL_VIEW_STATE);
     if (mapRef.current) {
       mapRef.current.flyTo({
@@ -795,23 +795,24 @@ export default function MapView(props: MapViewProps) {
 
       {/* FLOATING TOP TOOLBAR: AREA NAVIGATOR + BASEMAP SWITCHER (cleanly positioned between panels) */}
       <div className="absolute top-20 left-72 z-20 flex flex-wrap items-center gap-2 max-w-[calc(100vw-700px)] select-none pointer-events-auto">
-        {/* AUSTIN AREA NAVIGATOR */}
+        {/* INDIA STATE & REGIONAL METRO NAVIGATOR */}
         <div className="flex items-center gap-1 bg-white/95 backdrop-blur border border-slate-200 p-1.5 rounded-lg shadow-md overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <span className="font-mono text-[10px] text-slate-500 uppercase px-2 font-semibold whitespace-nowrap">
-            AREAS:
+          <span className="font-mono text-[10px] text-emerald-800 uppercase px-2 font-bold whitespace-nowrap flex items-center gap-1">
+            <span>🇮🇳</span>
+            <span>REGION / STATE:</span>
           </span>
-          {AUSTIN_AREAS.map((area) => {
+          {INDIA_AREAS.map((area) => {
             const isSelected = selectedAreaId === area.id;
             return (
               <button
                 key={area.id}
                 onClick={() => handleSelectArea(area)}
-                className={`font-mono text-[11px] px-2 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap ${
+                className={`font-mono text-[11px] px-2.5 py-1 rounded-md transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
                     ? 'bg-slate-900 text-white font-bold shadow-xs'
                     : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium'
                 }`}
-                title={area.description}
+                title={`${area.name} — ${area.description}`}
               >
                 {area.shortName}
               </button>
@@ -820,8 +821,8 @@ export default function MapView(props: MapViewProps) {
 
           <div className="h-4 w-px bg-slate-200 mx-1" />
 
-          {/* Toggle between All Metro vs Focused Area Hexes */}
-          {selectedAreaId !== 'all' && (
+          {/* Toggle between All India vs Focused Region Hexes */}
+          {selectedAreaId !== 'all_india' && (
             <button
               onClick={() => setFilterByArea((prev) => !prev)}
               className={`font-mono text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer whitespace-nowrap ${
@@ -830,7 +831,7 @@ export default function MapView(props: MapViewProps) {
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              {filterByArea ? '✓ AREA ONLY' : 'ALL METRO'}
+              {filterByArea ? '✓ REGION ONLY' : 'ALL INDIA'}
             </button>
           )}
         </div>
@@ -983,10 +984,10 @@ export default function MapView(props: MapViewProps) {
         <button
           onClick={handleResetMetro}
           className="w-8 h-8 flex items-center justify-center font-mono text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors text-xs cursor-pointer"
-          title="Reset Full Austin Metro View"
-          aria-label="Reset Metro"
+          title="Reset Full India View (Subcontinent Overview)"
+          aria-label="Reset India"
         >
-          🎯
+          🇮🇳
         </button>
       </div>
 

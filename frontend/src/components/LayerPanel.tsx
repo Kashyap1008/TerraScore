@@ -65,22 +65,22 @@ export default function LayerPanel() {
         </div>
         <div className="flex flex-col gap-2">
           <button 
-            onClick={() => handleDemoPin(30.27, -97.74)}
+            onClick={() => handleDemoPin(19.0657, 72.8687)}
             className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
           >
-            [ HIGH_DEMAND ]
+            [ BKC_FINANCIAL ]
           </button>
           <button 
-            onClick={() => handleDemoPin(30.26, -97.75)}
+            onClick={() => handleDemoPin(19.0700, 72.8750)}
             className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
           >
-            [ FLOOD_RISK ]
+            [ FLOOD_RISK_KUR]
           </button>
           <button 
-            onClick={() => handleDemoPin(30.29, -97.72)}
+            onClick={() => handleDemoPin(12.9716, 77.7499)}
             className="w-full text-left font-mono text-xs uppercase px-2 py-1.5 border border-panelEdge hover:border-neonGreen hover:text-neonGreen transition-colors"
           >
-            [ UNDERSERVED ]
+            [ BLR_WHITEFIELD ]
           </button>
         </div>
       </div>
