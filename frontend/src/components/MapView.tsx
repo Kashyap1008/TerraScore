@@ -318,6 +318,76 @@ export default function MapView(props: MapViewProps) {
     }
   };
 
+  const isDeckInteractingRef = useRef(false);
+
+  // Synchronize camera when user drags or zooms DeckGL
+  const handleViewStateChange = (params: { viewState: Record<string, unknown> }) => {
+    isDeckInteractingRef.current = true;
+    const nextState = params.viewState;
+    const next = {
+      longitude: Number(nextState.longitude ?? viewState.longitude),
+      latitude: Number(nextState.latitude ?? viewState.latitude),
+      zoom: Number(nextState.zoom ?? viewState.zoom),
+      pitch: Number(nextState.pitch ?? 0),
+      bearing: Number(nextState.bearing ?? 0),
+    };
+    setViewState(next);
+    if (mapRef.current) {
+      mapRef.current.jumpTo({
+        center: [next.longitude, next.latitude],
+        zoom: next.zoom,
+        bearing: next.bearing,
+        pitch: next.pitch,
+      });
+    }
+  };
+
+  const handleInteractionStateChange = (state: { isDragging?: boolean; isPanning?: boolean; isZooming?: boolean }) => {
+    if (!state.isDragging && !state.isPanning && !state.isZooming) {
+      setTimeout(() => {
+        isDeckInteractingRef.current = false;
+      }, 50);
+    } else {
+      isDeckInteractingRef.current = true;
+    }
+  };
+
+  // Zoom button handlers
+  const handleZoomIn = () => {
+    const nextZoom = Math.min(viewState.zoom + 1, 19);
+    setViewState((prev) => ({ ...prev, zoom: nextZoom }));
+    if (mapRef.current) {
+      mapRef.current.easeTo({ zoom: nextZoom, duration: 250 });
+    }
+  };
+
+  const handleZoomOut = () => {
+    const nextZoom = Math.max(viewState.zoom - 1, 4);
+    setViewState((prev) => ({ ...prev, zoom: nextZoom }));
+    if (mapRef.current) {
+      mapRef.current.easeTo({ zoom: nextZoom, duration: 250 });
+    }
+  };
+
+  const handleResetNorth = () => {
+    setViewState((prev) => ({ ...prev, bearing: 0, pitch: 0 }));
+    if (mapRef.current) {
+      mapRef.current.easeTo({ bearing: 0, pitch: 0, duration: 300 });
+    }
+  };
+
+  const handleResetMetro = () => {
+    setSelectedAreaId('all');
+    setViewState(INITIAL_VIEW_STATE);
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+        zoom: INITIAL_VIEW_STATE.zoom,
+        speed: 1.2,
+      });
+    }
+  };
+
   // Initialize MapLibre ONCE on mount
   useEffect(() => {
     console.log('MAPVIEW_USE_EFFECT_START', { container: containerRef.current });
@@ -355,6 +425,7 @@ export default function MapView(props: MapViewProps) {
 
     map.on('move', () => {
       if (!map) return;
+      if (isDeckInteractingRef.current) return;
       const center = map.getCenter();
       setViewState({
         longitude: center.lng,
@@ -696,17 +767,27 @@ export default function MapView(props: MapViewProps) {
       {/* MapLibre canvas container */}
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
 
-      {/* deck.gl overlay */}
+      {/* deck.gl overlay with full mouse & zoom interaction */}
       <div className="absolute inset-0 z-[1]">
         <DeckGL
           viewState={viewState}
+          onViewStateChange={handleViewStateChange}
+          onInteractionStateChange={handleInteractionStateChange}
+          controller={{
+            scrollZoom: { speed: 0.015, smooth: true },
+            dragPan: true,
+            dragRotate: true,
+            doubleClickZoom: true,
+            touchZoom: true,
+            touchRotate: true,
+            keyboard: true,
+          }}
           layers={deckLayers}
-          controller={false}
           getCursor={({ isHovering }) => (isHovering ? 'pointer' : 'default')}
           onClick={(info) => {
             const pickInfo = info as { coordinate?: [number, number] };
             if (pickInfo.coordinate) {
-              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+              handleCoordClickRef.current(pickInfo.coordinate[1], pickInfo.coordinate[0]);
             }
           }}
         />
@@ -862,6 +943,51 @@ export default function MapView(props: MapViewProps) {
             <span className="text-slate-800 font-medium">&lt;40</span>
           </div>
         </div>
+      </div>
+
+      {/* FLOATING ZOOM & ORIENTATION CONTROLS */}
+      <div className="absolute bottom-24 right-6 z-20 flex flex-col items-center bg-white/95 backdrop-blur border border-slate-200 rounded-lg shadow-lg p-1 gap-1 select-none">
+        <button
+          onClick={handleZoomIn}
+          className="w-8 h-8 flex items-center justify-center font-mono font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors text-base cursor-pointer"
+          title="Zoom In (+)"
+          aria-label="Zoom In"
+        >
+          +
+        </button>
+
+        <div className="font-mono text-[9px] font-semibold text-slate-500 px-1 py-0.5 border-y border-slate-200 text-center min-w-[30px]">
+          {Math.round(viewState.zoom * 10) / 10}z
+        </div>
+
+        <button
+          onClick={handleZoomOut}
+          className="w-8 h-8 flex items-center justify-center font-mono font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors text-base cursor-pointer"
+          title="Zoom Out (-)"
+          aria-label="Zoom Out"
+        >
+          –
+        </button>
+
+        <div className="w-5 h-px bg-slate-200 my-0.5" />
+
+        <button
+          onClick={handleResetNorth}
+          className="w-8 h-8 flex items-center justify-center font-mono text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors text-xs cursor-pointer"
+          title="Reset North / 2D Orientation"
+          aria-label="Reset North"
+        >
+          🧭
+        </button>
+
+        <button
+          onClick={handleResetMetro}
+          className="w-8 h-8 flex items-center justify-center font-mono text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors text-xs cursor-pointer"
+          title="Reset Full Austin Metro View"
+          aria-label="Reset Metro"
+        >
+          🎯
+        </button>
       </div>
 
       {/* Draw tool */}
