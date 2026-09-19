@@ -10,6 +10,7 @@ export default function TopBar() {
     currentUser,
     setIsAuthModalOpen,
     setIsProfileModalOpen,
+    setShowLandingPage,
   } = useAppStore();
 
   const navItems: { id: AppView; label: string; icon: string; badge?: number }[] = [
