@@ -8,10 +8,10 @@ never read os.environ directly in scripts.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class MetroConfig:
     """Immutable description of the metro area being analysed."""
 
@@ -35,6 +35,13 @@ class MetroConfig:
             raise ValueError(f"Invalid bbox latitude range: {minlat}, {maxlat}")
         if not (0 <= self.h3_resolution <= 15):
             raise ValueError(f"H3 resolution must be 0-15, got {self.h3_resolution}")
+
+    @property
+    def shapely_box(self):
+        """Return a Shapely box polygon for bbox clipping."""
+        from shapely.geometry import box
+        minlon, minlat, maxlon, maxlat = self.bbox
+        return box(minlon, minlat, maxlon, maxlat)
 
 
 def _parse_bbox(raw: str) -> tuple[float, float, float, float]:
