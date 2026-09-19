@@ -1,8 +1,8 @@
-﻿SHELL := /bin/bash
+SHELL := /bin/bash
 TIMESTAMP = $(shell date "+%Y-%m-%d %T")
 BANNER = @echo ""; @echo "==> [$(TIMESTAMP)] $@"; @echo ""
 
-.PHONY: up down logs ingest tiles dev-backend dev-frontend demo types
+.PHONY: up down logs ingest pipeline score tiles dev-backend dev-frontend demo types
 
 up:
 	$(BANNER)
@@ -19,18 +19,25 @@ logs:
 ingest:
 	$(BANNER)
 	set -e; \
-	bash scripts/01_fetch_census.sh; \
-	bash scripts/02_fetch_osm.sh; \
-	bash scripts/03_fetch_fema.sh; \
-	bash scripts/04_fetch_epa.sh; \
-	bash scripts/05_fetch_landuse.sh; \
-	bash scripts/06_load_postgis.sh; \
-	bash scripts/07_build_h3_grid.sh; \
-	bash scripts/08_score_grid.sh
+	python pipeline/01_ingest_census.py; \
+	python pipeline/02_ingest_osm.py; \
+	python pipeline/03_ingest_fema.py; \
+	python pipeline/04_ingest_epa.py
+
+score:
+	$(BANNER)
+	set -e; \
+	python pipeline/06_build_h3_grid.py; \
+	python pipeline/07_score_grid.py; \
+	python pipeline/08_hotspot_gi.py
 
 tiles:
 	$(BANNER)
-	bash scripts/09_export_tiles.sh
+	python pipeline/09_export_tiles.py
+
+pipeline:
+	$(BANNER)
+	$(MAKE) ingest && $(MAKE) score && $(MAKE) tiles
 
 dev-backend:
 	$(BANNER)
@@ -42,7 +49,7 @@ dev-frontend:
 
 demo:
 	$(BANNER)
-	$(MAKE) up && $(MAKE) ingest && $(MAKE) tiles
+	$(MAKE) up && $(MAKE) pipeline
 
 types:
 	$(BANNER)
