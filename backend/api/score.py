@@ -1,6 +1,6 @@
 import logging
 from typing import Optional, Dict, Literal, Any
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from core.scoring import latlng_to_h3, load_preset, compute_score
 from core.mock_cell import generate_mock_cell
@@ -16,6 +16,16 @@ class ScoreRequest(BaseModel):
 
 @router.post("/score")
 async def get_score(req: ScoreRequest, request: Request) -> Dict[str, Any]:
+    # 1. Unknown preset is handled by Pydantic (Literal) returning 422.
+    
+    # 2. Weights summing to 0
+    if req.weights and sum(req.weights.values()) == 0:
+        raise HTTPException(status_code=400, detail="weights must sum to > 0")
+
+    # 3. Check bbox (Austin bbox roughly from config)
+    if not (30.1 <= req.lat <= 30.5 and -98.0 <= req.lon <= -97.5):
+        return {"score": None, "reason": "outside_coverage"}
+
     h3_idx = latlng_to_h3(req.lat, req.lon)
     
     # Mocking DB fetch logic for now
@@ -44,11 +54,13 @@ class BatchScoreRequest(BaseModel):
 @router.post("/score/batch")
 async def get_score_batch(req: BatchScoreRequest, request: Request):
     from db.session import get_db
-    from fastapi import Depends
-    from sqlalchemy.orm import Session
     from sqlalchemy import text
     import json
     
+    # 4. Empty polygon
+    if not req.polygon or "coordinates" not in req.polygon or not req.polygon["coordinates"] or not req.polygon["coordinates"][0]:
+        raise HTTPException(status_code=400, detail="polygon required")
+        
     preset_col = {
         'retail': 'score_retail',
         'warehouse': 'score_warehouse',
@@ -58,8 +70,6 @@ async def get_score_batch(req: BatchScoreRequest, request: Request):
     if not preset_col:
         return {"error": "Invalid preset"}
 
-    # We use Shapely to convert the GeoJSON dict into WKT
-    # Actually ST_GeomFromGeoJSON in PostGIS takes a string, so we can just dump the dict
     polygon_json = json.dumps(req.polygon)
 
     query = text(f"""
@@ -70,9 +80,6 @@ async def get_score_batch(req: BatchScoreRequest, request: Request):
         ORDER BY {preset_col} DESC
         LIMIT :limit
     """)
-    
-    # Needs db connection! Let's mock it since we are missing `db = Depends(get_db)` in the route signature.
-    # Wait, I CAN add `db = Depends(get_db)` to the route signature. But I'd need to import it.
     
     try:
         db_gen = get_db()

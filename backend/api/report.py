@@ -8,8 +8,21 @@ router = APIRouter()
 
 @router.get("/report/{h3_index}")
 async def get_report(h3_index: str, request: Request, preset: str = "retail"):
-    # Since we can't easily reverse h3 to lat/lon cleanly without h3 lib (which we have), let's do it:
     import h3
+    
+    if not h3.h3_is_valid(h3_index):
+        return HTMLResponse(
+            content="""
+            <html>
+                <body style="background: #050505; color: #FFF; font-family: monospace; text-align: center; padding: 50px;">
+                    <h1 style="color: #FF00FF;">404 - CELL NOT FOUND</h1>
+                    <p>The requested H3 index does not exist in the active coverage area.</p>
+                </body>
+            </html>
+            """,
+            status_code=404
+        )
+        
     try:
         lat, lon = h3.h3_to_geo(h3_index)
     except Exception:

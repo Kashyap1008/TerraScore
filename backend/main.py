@@ -37,6 +37,52 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.warning(f"Redis connection failed at startup: {e}")
 
+    # Load Metro percentiles
+    app.state.p1_pop_density = 0.0
+    app.state.p99_pop_density = 10000.0
+    app.state.worst_decile_aqi = 0.1
+    if app.state.db_ok:
+        try:
+            with engine.connect() as conn:
+                res = conn.execute(text("""
+                    SELECT
+                        percentile_cont(0.01) WITHIN GROUP (ORDER BY pop_density_km2),
+                        percentile_cont(0.99) WITHIN GROUP (ORDER BY pop_density_km2)
+                    FROM derived.h3_grid WHERE pop_density_km2 > 0
+                """)).first()
+                if res and res[0] is not None:
+                    app.state.p1_pop_density = res[0]
+                    app.state.p99_pop_density = res[1]
+        except Exception as e:
+            logger.warning(f"Failed to load percentiles from DB: {e}")
+
+    # Warm isochrone cache for 3 demo pins
+    import json
+    import httpx
+    import asyncio
+    
+    demo_pins_path = os.path.join("..", "fixtures", "demo_pins.json")
+    if os.path.exists(demo_pins_path):
+        try:
+            with open(demo_pins_path, "r") as f:
+                demo_pins = json.load(f)
+            
+            async def warm_pin(pin_data):
+                lat = pin_data["lat"]
+                lon = pin_data["lon"]
+                async with httpx.AsyncClient() as client:
+                    await client.post(
+                        "http://localhost:8000/api/v1/isochrone",
+                        json={"lat": lat, "lon": lon, "minutes": [10, 20, 30], "mode": "driving"},
+                        timeout=5.0
+                    )
+            
+            # Fire in parallel
+            await asyncio.gather(*(warm_pin(p) for p in demo_pins.values()))
+            logger.info("cache warmed for 3 demo pins")
+        except Exception as e:
+            logger.warning(f"Failed to warm cache for demo pins: {e}")
+            
     if app.state.db_ok and app.state.redis_ok:
         logger.info("backend ready on http://localhost:8000")
         

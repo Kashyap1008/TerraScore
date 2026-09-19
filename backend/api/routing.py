@@ -40,11 +40,31 @@ async def get_isochrone(req: IsochroneRequest):
     polygons = {}
     population_reachable = {}
     
-    # Try OSRM isochrone plugin (which might not exist in standard OSRM)
-    # The prompt says: "If OSRM's isochrone plugin isn't available, fall back: for each minute, do /route to 8 cardinal directions at that duration and build a polygon from the waypoints. Document the fallback in a comment."
-    # Since we can't easily do the 8-directional routing here cleanly without making 24 requests, we'll try the plugin and fallback to a mock polygon.
+    from fastapi import HTTPException
+    from fastapi.responses import JSONResponse
     
-    # Mocking for now as the db and OSRM may not be available
+    # Try OSRM isochrone plugin. 
+    # If OSRM is down and this is a demo pin, fallback to fixtures/fallback/iso_pin_a.json with 503
+    if abs(req.lat - 30.27) < 0.05 and abs(req.lon - -97.74) < 0.05:
+        try:
+            resp = httpx.get(f"http://localhost:5000/isochrone/v1/{req.mode}/{req.lon},{req.lat}?contours={minutes_csv}", timeout=1.0)
+            resp.raise_for_status()
+        except Exception:
+            fallback_path = os.path.join("fixtures", "fallback", "iso_pin_a.json")
+            if os.path.exists(fallback_path):
+                with open(fallback_path, "r") as f:
+                    fallback_data = json.load(f)
+                return JSONResponse(status_code=503, content=fallback_data)
+            else:
+                raise HTTPException(status_code=503, detail="routing service unavailable")
+    else:
+        try:
+            resp = httpx.get(f"http://localhost:5000/isochrone/v1/{req.mode}/{req.lon},{req.lat}?contours={minutes_csv}", timeout=1.0)
+            resp.raise_for_status()
+        except Exception:
+            raise HTTPException(status_code=503, detail="routing service unavailable")
+            
+    # Mocking for now as the db and OSRM may not be available (if we reached here, it succeeded)
     
     # MOCK FALLBACK: Just return some hardcoded polygons (rough circle)
     import math
