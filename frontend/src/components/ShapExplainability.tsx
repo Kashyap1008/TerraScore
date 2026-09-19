@@ -19,7 +19,7 @@ export default function ShapExplainability({
   const report: ShapReport = computeShapExplainer(score, preset, factors);
 
   return (
-    <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-xl shadow-2xl p-5 text-slate-800 font-sans max-w-lg w-full">
+    <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-xl shadow-2xl p-5 text-slate-800 font-sans max-w-lg w-full max-h-[90vh] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
         <div className="flex items-center gap-2">
