@@ -56,6 +56,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 from api.layers import router as layers_router
 from api.score import router as score_router
+from api.analysis import router as analysis_router
+from api.routing import router as routing_router
+from api.report import router as report_router
 
 app = FastAPI(
     title="Site Readiness Analyzer API",
@@ -66,6 +69,9 @@ app = FastAPI(
 
 app.include_router(layers_router, prefix="/api/v1")
 app.include_router(score_router, prefix="/api/v1")
+app.include_router(analysis_router, prefix="/api/v1")
+app.include_router(routing_router, prefix="/api/v1")
+app.include_router(report_router, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,

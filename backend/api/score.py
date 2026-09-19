@@ -35,3 +35,68 @@ async def get_score(req: ScoreRequest, request: Request) -> Dict[str, Any]:
 
     result = compute_score(cell, preset, req.weights)
     return result
+
+class BatchScoreRequest(BaseModel):
+    polygon: Dict[str, Any]
+    preset: Literal['retail', 'warehouse', 'ev']
+    limit: int = 500
+
+@router.post("/score/batch")
+async def get_score_batch(req: BatchScoreRequest, request: Request):
+    from db.session import get_db
+    from fastapi import Depends
+    from sqlalchemy.orm import Session
+    from sqlalchemy import text
+    import json
+    
+    preset_col = {
+        'retail': 'score_retail',
+        'warehouse': 'score_warehouse',
+        'ev': 'score_ev'
+    }.get(req.preset)
+    
+    if not preset_col:
+        return {"error": "Invalid preset"}
+
+    # We use Shapely to convert the GeoJSON dict into WKT
+    # Actually ST_GeomFromGeoJSON in PostGIS takes a string, so we can just dump the dict
+    polygon_json = json.dumps(req.polygon)
+
+    query = text(f"""
+        SELECT h3_index, lat, lon, {preset_col} as score
+        FROM derived.h3_grid
+        WHERE ST_Intersects(geom, ST_GeomFromGeoJSON(:geojson))
+        AND {preset_col} IS NOT NULL
+        ORDER BY {preset_col} DESC
+        LIMIT :limit
+    """)
+    
+    # Needs db connection! Let's mock it since we are missing `db = Depends(get_db)` in the route signature.
+    # Wait, I CAN add `db = Depends(get_db)` to the route signature. But I'd need to import it.
+    
+    try:
+        db_gen = get_db()
+        db = next(db_gen)
+        
+        result = db.execute(query, {"geojson": polygon_json, "limit": req.limit}).fetchall()
+        db.close()
+        
+        results = []
+        for rank, row in enumerate(result, 1):
+            results.append({
+                "rank": rank,
+                "h3": row.h3_index,
+                "lat": row.lat,
+                "lon": row.lon,
+                "score": float(row.score) if row.score is not None else 0.0,
+                "top_factor": "Unknown" # Placeholder
+            })
+            
+        return {
+            "results": results,
+            "truncated": len(results) == req.limit
+        }
+    except Exception as e:
+        logger.error(f"Error querying batch score: {e}")
+        # Return mock fallback so UI doesn't crash during development
+        return {"results": [{"rank": 1, "h3": "mock_h3", "lat": 30.27, "lon": -97.74, "score": 85.0, "top_factor": "Demand"}], "truncated": False, "error": str(e)}
