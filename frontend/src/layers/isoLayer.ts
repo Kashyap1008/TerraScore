@@ -24,8 +24,8 @@ export function addIsoLayers(
       source: 'isochrone-source',
       filter: ['==', ['get', 'minutes'], 30],
       paint: {
-        'fill-color': '#CCFF00',
-        'fill-opacity': 0.03,
+        'fill-color': '#0284C7',
+        'fill-opacity': 0.07,
       },
     });
   }
@@ -38,8 +38,8 @@ export function addIsoLayers(
       source: 'isochrone-source',
       filter: ['==', ['get', 'minutes'], 20],
       paint: {
-        'fill-color': '#CCFF00',
-        'fill-opacity': 0.06,
+        'fill-color': '#0284C7',
+        'fill-opacity': 0.12,
       },
     });
   }
@@ -52,8 +52,8 @@ export function addIsoLayers(
       source: 'isochrone-source',
       filter: ['==', ['get', 'minutes'], 10],
       paint: {
-        'fill-color': '#CCFF00',
-        'fill-opacity': 0.10,
+        'fill-color': '#0284C7',
+        'fill-opacity': 0.18,
       },
     });
   }
@@ -65,8 +65,8 @@ export function addIsoLayers(
       type: 'line',
       source: 'isochrone-source',
       paint: {
-        'line-color': '#CCFF00',
-        'line-width': 1,
+        'line-color': '#0284C7',
+        'line-width': 1.5,
         'line-dasharray': [4, 2],
       },
     });

@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 body {
-  background: #050505;
-  color: #fff;
+  background: #F8FAFC;
+  color: #0F172A;
   font-family: 'Space Grotesk', sans-serif;
   margin: 0;
   overflow: hidden;
@@ -23,8 +23,8 @@ body {
 
 .cyber-grid {
   background-image:
-    linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
-  animation: grid-scroll 20s linear infinite;
+  animation: grid-scroll 30s linear infinite;
 }

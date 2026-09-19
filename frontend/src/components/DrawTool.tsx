@@ -32,15 +32,15 @@ export default function DrawTool({
       <button
         type="button"
         onClick={onToggleDrawing}
-        className={`font-mono text-xs uppercase px-3 py-1.5 rounded-sm border transition-colors cursor-pointer shadow-md flex items-center gap-1.5 ${
+        className={`font-mono text-xs uppercase px-3 py-1.5 rounded-md border transition-all cursor-pointer shadow-sm flex items-center gap-1.5 ${
           drawing
-            ? 'bg-neonCyan text-black border-neonCyan font-bold animate-pulse'
-            : 'bg-panel/85 backdrop-blur text-neonCyan border-neonCyan hover:bg-neonCyan hover:text-black'
+            ? 'bg-sky-600 text-white border-sky-600 font-bold shadow-md animate-pulse'
+            : 'bg-white/95 backdrop-blur text-sky-700 border-sky-300 hover:bg-sky-50 hover:border-sky-400 font-medium'
         }`}
       >
-        <span>{drawing ? `DRAWING (${vertexCount}/3)` : 'DRAW_ZONE'}</span>
+        <span>{drawing ? `DRAWING (${vertexCount}/3)` : 'DRAW ZONE'}</span>
         {drawing && (
-          <span className="text-[10px] opacity-80 font-normal">
+          <span className="text-[10px] opacity-90 font-normal ml-1">
             [ESC TO CANCEL]
           </span>
         )}
@@ -50,7 +50,7 @@ export default function DrawTool({
         <button
           type="button"
           onClick={onClearPolygon}
-          className="bg-panel/85 backdrop-blur text-neonMagenta border border-neonMagenta hover:bg-neonMagenta hover:text-black font-mono text-xs uppercase px-2.5 py-1.5 rounded-sm transition-colors cursor-pointer"
+          className="bg-white/95 backdrop-blur text-rose-600 border border-rose-300 hover:bg-rose-50 hover:text-rose-700 font-mono text-xs uppercase px-2.5 py-1.5 rounded-md shadow-sm transition-colors cursor-pointer font-medium"
         >
           CLEAR
         </button>

@@ -29,16 +29,24 @@ export function createHotspotLayer(opts: HotspotLayerOpts) {
       const type = (feat.properties as { type?: string })?.type;
       const z = (feat.properties as { z?: number })?.z;
       if (type === 'cold' || (z != null && z < 0)) {
-        return [255, 0, 255, 178]; // neonMagenta for cold
+        return [239, 68, 68, 190]; // Red/Rose for cold
       }
-      return [204, 255, 0, 178]; // neonGreen for hot
+      return [16, 185, 129, 200]; // Emerald Green for hot
     },
-    getLineColor: [204, 255, 0, 255],
-    lineWidthMinPixels: 2,
+    getLineColor: (d: unknown) => {
+      const feat = d as GeoJSON.Feature;
+      const type = (feat.properties as { type?: string })?.type;
+      const z = (feat.properties as { z?: number })?.z;
+      if (type === 'cold' || (z != null && z < 0)) {
+        return [220, 38, 38, 255];
+      }
+      return [5, 150, 105, 255];
+    },
+    lineWidthMinPixels: 2.5,
     getElevation: 0,
-    opacity: opts.opacity ?? 0.85,
+    opacity: opts.opacity ?? 0.9,
     autoHighlight: true,
-    highlightColor: [255, 255, 255, 120],
+    highlightColor: [255, 255, 255, 140],
     onHover: opts.onHover,
     onClick: opts.onClick,
   });

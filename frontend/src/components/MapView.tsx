@@ -40,24 +40,26 @@ function ensurePmtilesProtocol() {
 const mapStyle: maplibregl.StyleSpecification = {
   version: 8,
   sources: {
-    osm: {
+    cartoLight: {
       type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tiles: [
+        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+      ],
       tileSize: 256,
-      attribution: '© OpenStreetMap contributors',
+      attribution: '© OpenStreetMap contributors, © CARTO',
     },
   },
   layers: [
-    { id: 'bg', type: 'background', paint: { 'background-color': '#050505' } },
+    { id: 'bg', type: 'background', paint: { 'background-color': '#F8FAFC' } },
     {
-      id: 'osm',
+      id: 'cartoLight',
       type: 'raster',
-      source: 'osm',
+      source: 'cartoLight',
       paint: {
-        'raster-saturation': -1,
-        'raster-brightness-min': 0,
-        'raster-brightness-max': 0.5,
-        'raster-contrast': 0.2,
+        'raster-saturation': 0.1,
+        'raster-contrast': 0.05,
       },
     },
   ],
@@ -306,10 +308,10 @@ export default function MapView(props: MapViewProps) {
             'fill-color': [
               'step',
               ['coalesce', ['get', 'score_retail'], ['get', 'score'], 0],
-              '#FF00FF',
-              40, '#FFAA00',
-              60, '#00E5FF',
-              80, '#CCFF00',
+              '#EF4444',
+              40, '#F59E0B',
+              60, '#06B6D4',
+              80, '#10B981',
             ],
           },
         });
@@ -350,7 +352,7 @@ export default function MapView(props: MapViewProps) {
           'source-layer': 'h3_grid',
           filter: ['>', ['coalesce', ['get', 'hotspot_z_retail'], ['get', 'hotspot_z'], 0], 1.96],
           paint: {
-            'fill-color': '#CCFF00',
+            'fill-color': '#10B981',
             'fill-opacity': 0.85 * (layerOpacity?.hotspots ?? 1.0),
           },
         });
@@ -366,7 +368,7 @@ export default function MapView(props: MapViewProps) {
           'source-layer': 'h3_grid',
           filter: ['>', ['coalesce', ['get', 'hotspot_z_retail'], ['get', 'hotspot_z'], 0], 1.96],
           paint: {
-            'line-color': '#CCFF00',
+            'line-color': '#059669',
             'line-width': 2,
             'line-opacity': layerOpacity?.hotspots ?? 1.0,
           },
@@ -549,39 +551,66 @@ export default function MapView(props: MapViewProps) {
       {/* Hover tooltip */}
       {hoveredCell && (
         <div
-          className="absolute pointer-events-none z-[10] bg-panel/90 backdrop-blur border border-neonGreen px-2.5 py-1.5 rounded-sm shadow-neon-green font-mono text-neonGreen text-xs space-y-0.5"
+          className="absolute pointer-events-none z-[10] bg-white/95 backdrop-blur border border-slate-200 px-3 py-2 rounded-lg shadow-xl font-mono text-slate-800 text-xs space-y-0.5 border-l-4"
           style={{
             left: `${hoveredCell.x + 14}px`,
             top: `${hoveredCell.y + 14}px`,
+            borderLeftColor:
+              hoveredCell.score >= 80
+                ? '#10B981'
+                : hoveredCell.score >= 60
+                ? '#06B6D4'
+                : hoveredCell.score >= 40
+                ? '#F59E0B'
+                : '#EF4444',
           }}
         >
-          <div>H3: {hoveredCell.hex.length > 8 ? `${hoveredCell.hex.slice(0, 8)}…` : hoveredCell.hex}</div>
-          <div className="font-bold">SCORE: {hoveredCell.score}</div>
+          <div className="text-slate-500 text-[10px]">
+            H3: {hoveredCell.hex.length > 8 ? `${hoveredCell.hex.slice(0, 8)}…` : hoveredCell.hex}
+          </div>
+          <div className="font-bold flex items-center justify-between gap-3 text-slate-900">
+            <span>SITE SCORE:</span>
+            <span
+              className="font-extrabold text-sm"
+              style={{
+                color:
+                  hoveredCell.score >= 80
+                    ? '#059669'
+                    : hoveredCell.score >= 60
+                    ? '#0284C7'
+                    : hoveredCell.score >= 40
+                    ? '#D97706'
+                    : '#DC2626',
+              }}
+            >
+              {hoveredCell.score}
+            </span>
+          </div>
         </div>
       )}
 
       {/* Score legend */}
-      <div className="absolute bottom-6 right-6 z-[10] bg-panel/85 backdrop-blur border border-panelEdge px-3 py-2 rounded-sm shadow-md font-mono text-[11px] select-none">
-        <div className="text-textMuted uppercase tracking-wider mb-1.5 flex items-center gap-1">
-          <span>SCORE</span>
+      <div className="absolute bottom-6 right-6 z-[10] bg-white/90 backdrop-blur border border-slate-200 px-3.5 py-2.5 rounded-lg shadow-lg font-mono text-[11px] select-none text-slate-700">
+        <div className="text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between text-[10px] font-semibold">
+          <span>SUITABILITY INDEX</span>
           <span>&rarr;</span>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[#CCFF00] inline-block" />
-            <span className="text-white">80+</span>
+        <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#10B981] inline-block shadow-xs" />
+            <span className="text-slate-800 font-medium">80+</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[#00E5FF] inline-block" />
-            <span className="text-white">60–79</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#06B6D4] inline-block shadow-xs" />
+            <span className="text-slate-800 font-medium">60–79</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[#FFAA00] inline-block" />
-            <span className="text-white">40–59</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#F59E0B] inline-block shadow-xs" />
+            <span className="text-slate-800 font-medium">40–59</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[#FF00FF] inline-block" />
-            <span className="text-white">&lt;40</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-[#EF4444] inline-block shadow-xs" />
+            <span className="text-slate-800 font-medium">&lt;40</span>
           </div>
         </div>
       </div>
@@ -604,8 +633,9 @@ export default function MapView(props: MapViewProps) {
 
       {/* Cyber-grid overlay & status tag */}
       <div className="cyber-grid absolute inset-0 pointer-events-none z-[1]" />
-      <div className="absolute top-3 left-3 z-[2] font-mono text-[11px] uppercase tracking-widest text-[#CCFF00]">
-        // MAP_ENGINE :: ONLINE
+      <div className="absolute top-3 left-3 z-[2] font-mono text-[11px] uppercase tracking-wider text-emerald-700 bg-white/90 backdrop-blur border border-slate-200 px-2.5 py-1 rounded-md shadow-xs font-semibold flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span>MAP ENGINE // LIVE</span>
       </div>
     </div>
   );

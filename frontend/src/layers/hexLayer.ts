@@ -9,10 +9,10 @@ export interface HexLayerOpts {
 
 function getHexColor(score: number | null | undefined): [number, number, number, number] {
   if (score == null) return [0, 0, 0, 0];
-  if (score >= 80) return [204, 255, 0, 140]; // neonGreen
-  if (score >= 60) return [0, 229, 255, 140]; // neonCyan
-  if (score >= 40) return [255, 170, 0, 140]; // amber
-  return [255, 0, 255, 140]; // neonMagenta
+  if (score >= 80) return [16, 185, 129, 165]; // Emerald Green
+  if (score >= 60) return [6, 182, 212, 165];  // Cyan / Sky Blue
+  if (score >= 40) return [245, 158, 11, 165]; // Warm Amber
+  return [239, 68, 68, 165];                  // Rose / Red
 }
 
 export function createHexLayer(opts: HexLayerOpts) {
@@ -33,12 +33,12 @@ export function createHexLayer(opts: HexLayerOpts) {
       const score = (feat.properties as { score?: number })?.score;
       return getHexColor(score);
     },
-    getLineColor: [0, 229, 255, 80],
+    getLineColor: [255, 255, 255, 220],
     lineWidthMinPixels: 1,
     getElevation: 0,
     opacity: opts.opacity ?? 1,
     autoHighlight: true,
-    highlightColor: [255, 255, 255, 80],
+    highlightColor: [255, 255, 255, 140],
     onHover: opts.onHover,
     onClick: opts.onClick,
   });
