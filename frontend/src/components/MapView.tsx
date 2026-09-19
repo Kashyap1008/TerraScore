@@ -373,7 +373,7 @@ export default function MapView(props: MapViewProps) {
     }
 
     mapRef.current = map;
-    (window as unknown as { __map: maplibregl.Map }).__map = map;
+    Object.assign(window, { __map: map });
 
     map.on('load', () => {
       setMapReady(true);
@@ -606,6 +606,13 @@ export default function MapView(props: MapViewProps) {
     }
   }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
 
+  const handleDeckClick = (info: unknown) => {
+    const pickInfo = info as { coordinate?: [number, number] };
+    if (pickInfo.coordinate) {
+      handleCoordClickRef.current(pickInfo.coordinate[1], pickInfo.coordinate[0]);
+    }
+  };
+
   // Build deck.gl layers
   const deckLayers = useMemo(() => {
     const layers = [];
@@ -638,12 +645,7 @@ export default function MapView(props: MapViewProps) {
               setHoveredCell(null);
             }
           },
-          onClick: (info: unknown) => {
-            const pickInfo = info as { coordinate?: [number, number] };
-            if (pickInfo.coordinate) {
-              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
-            }
-          },
+          onClick: handleDeckClick,
         })
       );
     }
@@ -676,12 +678,7 @@ export default function MapView(props: MapViewProps) {
               setHoveredCell(null);
             }
           },
-          onClick: (info: unknown) => {
-            const pickInfo = info as { coordinate?: [number, number] };
-            if (pickInfo.coordinate) {
-              handleCoordClick(pickInfo.coordinate[1], pickInfo.coordinate[0]);
-            }
-          },
+          onClick: handleDeckClick,
         })
       );
     }

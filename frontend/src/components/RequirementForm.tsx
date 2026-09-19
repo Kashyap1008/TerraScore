@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { resolveLocationName } from '../utils/locationResolver';
 
 interface MatchedCandidate {
   h3: string;

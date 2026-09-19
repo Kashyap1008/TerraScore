@@ -1,14 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import type { SavedSite, SiteStatus } from '../utils/storage';
+import type { SavedSite } from '../utils/storage';
 
 export default function CollectionsView() {
   const {
     collections,
     savedSites,
     removeSavedSite,
-    updateSavedSite,
-    deleteCollection,
     setCurrentView,
     setSelectedSite,
     setFlyTo,
@@ -35,8 +33,6 @@ export default function CollectionsView() {
       return matchesCollection && matchesStatus && matchesSearch;
     });
   }, [savedSites, activeCollectionId, statusFilter, searchQuery]);
-
-  const activeCollection = collections.find((c) => c.id === activeCollectionId);
 
   const handleFlyToSite = (site: SavedSite) => {
     setSelectedSite({ lat: site.lat, lon: site.lon });
