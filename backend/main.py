@@ -54,12 +54,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.warning(f"Error closing redis: {e}")
 
+from api.layers import router as layers_router
+from api.score import router as score_router
+
 app = FastAPI(
     title="Site Readiness Analyzer API",
     version=settings.api_version,
     docs_url="/docs",
     lifespan=lifespan
 )
+
+app.include_router(layers_router, prefix="/api/v1")
+app.include_router(score_router, prefix="/api/v1")
 
 app.add_middleware(
     CORSMiddleware,
