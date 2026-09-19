@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { fetchScore } from '../api/client';
-import { ScoreResponse } from '../api/types';
+import type { ScoreResponse } from '../api/types';
 
 export default function SiteScoreCard() {
   const { selectedSite, preset } = useAppStore();

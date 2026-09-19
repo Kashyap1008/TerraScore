@@ -1,4 +1,4 @@
-import { ScoreResponse, PresetName, LayerMeta } from './types';
+import type { ScoreResponse, PresetName, LayerMeta } from './types';
 import { MOCK_SCORE_RESPONSE } from './mockData';
 
 const USE_MOCK = true;
