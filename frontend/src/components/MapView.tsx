@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import DeckGL from '@deck.gl/react';
@@ -77,7 +77,13 @@ export default function MapView(props: MapViewProps) {
   const onMapClickRef = useRef(props.onMapClick);
   const onPolygonDrawRef = useRef(props.onPolygonDraw);
 
-  const { layerOpacity, drawnPolygon, setDrawnPolygon } = useAppStore();
+  const {
+    layerOpacity,
+    drawnPolygon,
+    setDrawnPolygon,
+    selectedSite,
+    isochroneData,
+  } = useAppStore();
 
   const [mapReady, setMapReady] = useState(false);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -87,6 +93,7 @@ export default function MapView(props: MapViewProps) {
   const [hotspotFeatures, setHotspotFeatures] = useState<GeoJSON.Feature[]>([]);
   const [hoveredCell, setHoveredCell] = useState<HoveredCellInfo | null>(null);
   const [pmtilesAvailable, setPmtilesAvailable] = useState(false);
+  const [pmtilesBaseUrl, setPmtilesBaseUrl] = useState<string>('/tiles');
 
   // Drawing state
   const [drawing, setDrawing] = useState(false);
@@ -97,33 +104,46 @@ export default function MapView(props: MapViewProps) {
     onPolygonDrawRef.current = props.onPolygonDraw;
   }, [props.onMapClick, props.onPolygonDraw]);
 
-  // Check PMTiles & load mock data on mount
+  // Check PMTiles manifest & load fallback datasets on mount
   useEffect(() => {
     ensurePmtilesProtocol();
 
-    // Guarded PMTiles check
-    fetch('/static/tiles/manifest.json')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((manifest) => {
-        if (
-          manifest &&
-          Array.isArray(manifest.layers) &&
-          manifest.layers.some((l: { id: string }) => l.id === 'h3_grid')
-        ) {
-          setPmtilesAvailable(true);
+    const checkManifest = async () => {
+      try {
+        let res = await fetch('/tiles/manifest.json');
+        let basePath = '/tiles';
+        if (!res.ok || !res.headers.get('content-type')?.includes('application/json')) {
+          res = await fetch('/static/tiles/manifest.json');
+          basePath = '/static/tiles';
         }
-      })
-      .catch(() => {
-        setPmtilesAvailable(false);
-      });
+        if (res.ok && res.headers.get('content-type')?.includes('application/json')) {
+          const manifest = await res.json();
+          const hasH3Grid =
+            manifest &&
+            (Array.isArray(manifest.layers)
+              ? manifest.layers.some((l: { id: string }) => l.id === 'h3_grid')
+              : Boolean(manifest.layers?.h3_grid || manifest.h3_grid));
 
-    // Fallback or base scores
+          if (hasH3Grid) {
+            setPmtilesBaseUrl(basePath);
+            setPmtilesAvailable(true);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Tiles manifest check failed, retaining geojson fallback:', err);
+      }
+      setPmtilesAvailable(false);
+    };
+
+    checkManifest();
+
+    // Fallback datasets
     fetch('/mock_scores.geojson')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<GeoJSON.FeatureCollection>;
+      .then((res) => (res.ok ? (res.json() as Promise<GeoJSON.FeatureCollection>) : null))
+      .then((data) => {
+        if (data) setScoresGeojson(data);
       })
-      .then((data) => setScoresGeojson(data))
       .catch((err: unknown) => console.warn('Failed to load /mock_scores.geojson:', err));
 
     fetch('/mock_pois.geojson')
@@ -148,7 +168,7 @@ export default function MapView(props: MapViewProps) {
       .catch((err: unknown) => console.warn('Failed to load /mock_hotspots.geojson:', err));
   }, []);
 
-  // Handle map click (normal or drawing)
+  // Handle map clicks (normal or drawing vertices)
   const handleCoordClick = (lat: number, lon: number) => {
     if (drawing) {
       const next: [number, number][] = [...drawVertices, [lon, lat]];
@@ -170,6 +190,19 @@ export default function MapView(props: MapViewProps) {
     }
   };
 
+  // Convert dynamic isochrone data into GeoJSON FeatureCollection
+  const dynamicIsoGeoJSON = useMemo(() => {
+    if (!isochroneData?.polygons) return null;
+    const features: GeoJSON.Feature[] = Object.entries(isochroneData.polygons).map(
+      ([mins, poly]) => ({
+        type: 'Feature',
+        properties: { minutes: parseInt(mins, 10) },
+        geometry: poly,
+      })
+    );
+    return { type: 'FeatureCollection', features } as GeoJSON.FeatureCollection;
+  }, [isochroneData]);
+
   // Initialize MapLibre
   useEffect(() => {
     if (!containerRef.current) return;
@@ -185,7 +218,6 @@ export default function MapView(props: MapViewProps) {
     mapRef.current = map;
 
     map.on('load', () => {
-      console.log('MapView ready');
       setMapReady(true);
     });
 
@@ -211,40 +243,57 @@ export default function MapView(props: MapViewProps) {
     };
   }, [drawing, drawVertices]);
 
+  // Smooth camera flying to selectedSite (e.g. from demo pins or compare chips)
+  useEffect(() => {
+    if (!selectedSite || !mapRef.current) return;
+    mapRef.current.flyTo({
+      center: [selectedSite.lon, selectedSite.lat],
+      zoom: 14,
+      essential: true,
+      speed: 1.2,
+    });
+  }, [selectedSite]);
+
   // Sync MapLibre vector/raster layers (roads, flood_zones, isochrone, pmtiles)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
 
-    // Roads
+    // Roads (cyan glow & linework)
     if (props.activeLayers.includes('roads')) {
       addRoadLayer(map);
     } else {
       removeRoadLayer(map);
     }
 
-    // Flood Zones
+    // Flood Zones (magenta polygons)
     if (props.activeLayers.includes('flood_zones')) {
       addFloodLayer(map);
     } else {
       removeFloodLayer(map);
     }
 
-    // Isochrone
+    // Isochrone (concentric green rings)
     if (props.activeLayers.includes('isochrone')) {
-      addIsoLayers(map, '/mock_iso.geojson');
+      addIsoLayers(map, dynamicIsoGeoJSON || '/mock_iso.geojson');
     } else {
       removeIsoLayers(map);
     }
 
     // Real PMTiles layer swap if available
-    if (pmtilesAvailable && props.activeLayers.includes('h3_grid')) {
+    const pmtilesUrl = `pmtiles://${window.location.origin}${pmtilesBaseUrl}/h3_grid.pmtiles`;
+
+    if (pmtilesAvailable && (props.activeLayers.includes('h3_grid') || props.activeLayers.includes('hotspots'))) {
       if (!map.getSource('pmtiles-h3')) {
         map.addSource('pmtiles-h3', {
           type: 'vector',
-          url: 'pmtiles:///static/tiles/h3_grid.pmtiles',
+          url: pmtilesUrl,
         });
       }
+    }
+
+    // PMTiles Base H3 Grid
+    if (pmtilesAvailable && props.activeLayers.includes('h3_grid')) {
       if (!map.getLayer('pmtiles-h3-layer')) {
         map.addLayer({
           id: 'pmtiles-h3-layer',
@@ -253,20 +302,96 @@ export default function MapView(props: MapViewProps) {
           'source-layer': 'h3_grid',
           paint: {
             'fill-opacity': layerOpacity?.h3_grid ?? 0.75,
-            'fill-color': '#CCFF00',
+            'fill-color': [
+              'step',
+              ['coalesce', ['get', 'score_retail'], ['get', 'score'], 0],
+              '#FF00FF',
+              40, '#FFAA00',
+              60, '#00E5FF',
+              80, '#CCFF00',
+            ],
           },
         });
+
+        map.on('mousemove', 'pmtiles-h3-layer', (e) => {
+          if (e.features && e.features.length > 0) {
+            const f = e.features[0];
+            const hex = String(f.properties?.h3_index || f.properties?.h3 || '');
+            const score = Number(f.properties?.score_retail ?? f.properties?.score ?? 0);
+            setHoveredCell({
+              hex,
+              score: Math.round(score * 10) / 10,
+              x: e.point.x,
+              y: e.point.y,
+            });
+            map.getCanvas().style.cursor = 'pointer';
+          }
+        });
+
+        map.on('mouseleave', 'pmtiles-h3-layer', () => {
+          setHoveredCell(null);
+          map.getCanvas().style.cursor = '';
+        });
+      } else {
+        map.setPaintProperty('pmtiles-h3-layer', 'fill-opacity', layerOpacity?.h3_grid ?? 0.75);
       }
     } else {
       if (map.getLayer('pmtiles-h3-layer')) map.removeLayer('pmtiles-h3-layer');
-      if (map.getSource('pmtiles-h3')) map.removeSource('pmtiles-h3');
     }
-  }, [props.activeLayers, mapReady, pmtilesAvailable, layerOpacity]);
+
+    // PMTiles Hotspots Layer (filtered to hotspot cells with z > 1.96)
+    if (pmtilesAvailable && props.activeLayers.includes('hotspots')) {
+      if (!map.getLayer('pmtiles-hotspots-layer')) {
+        map.addLayer({
+          id: 'pmtiles-hotspots-layer',
+          type: 'fill',
+          source: 'pmtiles-h3',
+          'source-layer': 'h3_grid',
+          filter: ['>', ['coalesce', ['get', 'hotspot_z_retail'], ['get', 'hotspot_z'], 0], 1.96],
+          paint: {
+            'fill-color': '#CCFF00',
+            'fill-opacity': 0.85 * (layerOpacity?.hotspots ?? 1.0),
+          },
+        });
+      } else {
+        map.setPaintProperty('pmtiles-hotspots-layer', 'fill-opacity', 0.85 * (layerOpacity?.hotspots ?? 1.0));
+      }
+
+      if (!map.getLayer('pmtiles-hotspots-line')) {
+        map.addLayer({
+          id: 'pmtiles-hotspots-line',
+          type: 'line',
+          source: 'pmtiles-h3',
+          'source-layer': 'h3_grid',
+          filter: ['>', ['coalesce', ['get', 'hotspot_z_retail'], ['get', 'hotspot_z'], 0], 1.96],
+          paint: {
+            'line-color': '#CCFF00',
+            'line-width': 2,
+            'line-opacity': layerOpacity?.hotspots ?? 1.0,
+          },
+        });
+      } else {
+        map.setPaintProperty('pmtiles-hotspots-line', 'line-opacity', layerOpacity?.hotspots ?? 1.0);
+      }
+    } else {
+      if (map.getLayer('pmtiles-hotspots-line')) map.removeLayer('pmtiles-hotspots-line');
+      if (map.getLayer('pmtiles-hotspots-layer')) map.removeLayer('pmtiles-hotspots-layer');
+    }
+
+    // Cleanup pmtiles source if neither layer is active
+    if (!pmtilesAvailable || (!props.activeLayers.includes('h3_grid') && !props.activeLayers.includes('hotspots'))) {
+      if (map.getSource('pmtiles-h3')) {
+        if (!map.getLayer('pmtiles-h3-layer') && !map.getLayer('pmtiles-hotspots-layer')) {
+          map.removeSource('pmtiles-h3');
+        }
+      }
+    }
+  }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
 
   // Build deck.gl layers
   const deckLayers = [];
 
-  // 1. H3 Hex Score layer (when not using PMTiles fallback)
+  // 1. H3 Hex Score layer (fallback when not using PMTiles)
   if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && scoresGeojson) {
     deckLayers.push(
       createHexLayer({
@@ -296,12 +421,12 @@ export default function MapView(props: MapViewProps) {
     );
   }
 
-  // 2. Hotspot layer
-  if (props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
+  // 2. Hotspot layer (fallback when not using PMTiles)
+  if (!pmtilesAvailable && props.activeLayers.includes('hotspots') && hotspotFeatures.length > 0) {
     deckLayers.push(
       createHotspotLayer({
         data: hotspotFeatures,
-        opacity: 0.9,
+        opacity: 0.9 * (layerOpacity?.hotspots ?? 1.0),
         onHover: (info: unknown) => {
           const pickInfo = info as { object?: GeoJSON.Feature; x?: number; y?: number };
           if (pickInfo.object?.properties) {
@@ -324,12 +449,12 @@ export default function MapView(props: MapViewProps) {
     );
   }
 
-  // 3. POIs layer
+  // 3. POIs layer (magenta diamonds for competitors + cyan circles for anchors)
   if (props.activeLayers.includes('pois') && poiFeatures.length > 0) {
     deckLayers.push(...createPoiLayers(poiFeatures));
   }
 
-  // 4. Transit stops layer
+  // 4. Transit stops layer (white dots)
   if (props.activeLayers.includes('transit_stops') && transitFeatures.length > 0) {
     deckLayers.push(createTransitLayer(transitFeatures));
   }
@@ -412,11 +537,11 @@ export default function MapView(props: MapViewProps) {
         <div
           className="absolute pointer-events-none z-[10] bg-panel/90 backdrop-blur border border-neonGreen px-2.5 py-1.5 rounded-sm shadow-neon-green font-mono text-neonGreen text-xs space-y-0.5"
           style={{
-            left: `${hoveredCell.x + 12}px`,
-            top: `${hoveredCell.y + 12}px`,
+            left: `${hoveredCell.x + 14}px`,
+            top: `${hoveredCell.y + 14}px`,
           }}
         >
-          <div>H3: {hoveredCell.hex.slice(0, 8)}…</div>
+          <div>H3: {hoveredCell.hex.length > 8 ? `${hoveredCell.hex.slice(0, 8)}…` : hoveredCell.hex}</div>
           <div className="font-bold">SCORE: {hoveredCell.score}</div>
         </div>
       )}
