@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SITE_READINESS Pitch Deck</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --neonGreen: #CCFF00;
+      --neonCyan: #00E5FF;
+      --neonMagenta: #FF00FF;
+      --textMuted: #888888;
+      --white: #FFFFFF;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: var(--font-display);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Cyber-grid overlay */
+    .cyber-grid {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(204, 255, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(204, 255, 0, 0.05) 1px, transparent 1px);
+    }
+
+    .slide-container {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      height: 100%;
+      max-height: 800px;
+      padding: 4rem;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header & Footer */
+    .header {
+      font-family: var(--font-mono);
+      color: var(--neonGreen);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+    }
+
+    .footer {
+      font-family: var(--font-mono);
+      color: var(--textMuted);
+      font-size: 1rem;
+      position: absolute;
+      bottom: 2rem;
+      right: 2rem;
+    }
+
+    /* Typography Utilities */
+    .mono { font-family: var(--font-mono); }
+    .text-green { color: var(--neonGreen); }
+    .text-cyan { color: var(--neonCyan); }
+    .text-magenta { color: var(--neonMagenta); }
+    .text-muted { color: var(--textMuted); }
+
+    /* Layout Utilities */
+    .center-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .row {
+      display: flex;
+      gap: 2rem;
+      width: 100%;
+    }
+
+    .col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* SVG Hexagon */
+    .hex-pulse {
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
+
+    /* Slide specific styles */
+    .title-h1 { font-size: 72px; font-weight: 700; margin: 1rem 0 0.5rem; letter-spacing: -0.02em; }
+    .title-sub { font-size: 18px; margin-bottom: 2rem; }
+    .title-team { font-size: 12px; margin-bottom: 0.5rem; }
+    .title-tagline { font-size: 14px; margin-top: 2rem; border-top: 1px solid var(--neonGreen); padding-top: 1rem; }
+
+    .problem-box {
+      border: 1px solid var(--neonMagenta);
+      background: rgba(255, 0, 255, 0.05);
+      padding: 2rem;
+      flex: 1;
+      border-radius: 4px;
+    }
+    .problem-label { font-size: 14px; color: var(--neonMagenta); margin-bottom: 1rem; display: block; }
+    .problem-text { font-size: 20px; line-height: 1.4; color: var(--white); }
+
+    .idea-h1 { font-size: 56px; font-weight: 700; margin-bottom: 0.5rem; }
+    .idea-sub { font-size: 24px; }
+    
+    .pipe-step {
+      border-left: 2px solid var(--neonCyan);
+      padding-left: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .pipe-label { font-size: 18px; color: var(--neonCyan); font-weight: bold; margin-bottom: 0.5rem; display: block; }
+    .pipe-desc { font-size: 16px; color: var(--white); }
+
+    .bullet-row { display: flex; align-items: baseline; margin-bottom: 1.5rem; }
+    .bullet-label { color: var(--neonGreen); font-size: 14px; width: 160px; flex-shrink: 0; }
+    .bullet-text { font-size: 24px; color: var(--white); }
+
+    @media print {
+      .cyber-grid { display: none; }
+      body { background: white; color: black; }
+      .text-white { color: black; }
+      .text-muted { color: #555; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cyber-grid"></div>
+  <div class="slide-container">
+    
+    <!-- Slide 1 -->
+    <div class="slide active" id="slide-1">
+      <div class="header" style="display:none;">// TITLE</div>
+      <div class="center-content">
+        <svg class="hex-pulse" width="100" height="115" viewBox="0 0 100 115" fill="none" stroke="var(--neonGreen)" stroke-width="3">
+          <polygon points="50,2 98,28.5 98,84.5 50,111 2,84.5 2,28.5" fill="rgba(204,255,0,0.1)"/>
+        </svg>
+        <h1 class="title-h1 text-white">SITE_READINESS</h1>
+        <div class="title-sub mono text-cyan">AI-Powered GeoSpatial Site Readiness Analyzer</div>
+        <div class="title-team mono text-muted">Team: Kashyap · Megh · Rudra · Aary</div>
+        <div class="title-tagline mono text-green">&gt; 18,450 hexagons. 5 data layers. One decision.</div>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide" id="slide-2">
+      <div class="header">// THE_PROBLEM</div>
+      <div class="center-content w-full" style="justify-content: center;">
+        <div class="row" style="margin-bottom: 4rem;">
+          <div class="problem-box">
+            <span class="problem-label mono">[ TOO SLOW ]</span>
+            <p class="problem-text">Site selection takes analysts weeks of manual GIS work.</p>
+          </div>
+          <div class="problem-box">
+            <span class="problem-label mono">[ INCONSISTENT ]</span>
+            <p class="problem-text">Two analysts, two different answers, same location.</p>
+          </div>
+          <div class="problem-box">
+            <span class="problem-label mono">[ UNEXPLAINABLE ]</span>
+            <p class="problem-text">Final decisions are a spreadsheet with no reasoning.</p>
+          </div>
+        </div>
+        <div class="mono text-green" style="font-size: 16px;">We turn weeks into 400 milliseconds.</div>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide" id="slide-3">
+      <div class="header">// THE_IDEA</div>
+      <div class="row" style="height: 100%; align-items: center;">
+        <div class="col" style="flex: 1.5;">
+          <h1 class="idea-h1 text-white">A credit score for land.</h1>
+          <p class="idea-sub mono text-muted">Paste a location. Get 0–100. See the reasons.</p>
+        </div>
+        <div class="col" style="flex: 1; align-items: center;">
+          <div style="position: relative; width: 160px; height: 184px; display: flex; justify-content: center; align-items: center; margin-bottom: 2rem;">
+            <svg width="160" height="184" viewBox="0 0 100 115" fill="none" stroke="var(--neonGreen)" stroke-width="2" style="position: absolute; top:0; left:0;">
+              <polygon points="50,2 98,28.5 98,84.5 50,111 2,84.5 2,28.5" fill="rgba(204,255,0,0.1)"/>
+            </svg>
+            <span style="font-size: 48px; font-weight: bold; color: var(--neonGreen); z-index: 10;">78</span>
+          </div>
+          <div style="width: 100%; max-width: 200px;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <span class="mono text-muted" style="font-size: 10px; width: 60px;">DEMAND</span>
+              <div style="height: 4px; background: #333; flex: 1;"><div style="height: 100%; background: var(--neonGreen); width: 82%;"></div></div>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <span class="mono text-muted" style="font-size: 10px; width: 60px;">ACCESS</span>
+              <div style="height: 4px; background: #333; flex: 1;"><div style="height: 100%; background: var(--neonCyan); width: 65%;"></div></div>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+              <span class="mono text-muted" style="font-size: 10px; width: 60px;">RISK</span>
+              <div style="height: 4px; background: #333; flex: 1;"><div style="height: 100%; background: var(--neonGreen); width: 95%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide" id="slide-4">
+      <div class="header">// PIPELINE</div>
+      <div class="center-content" style="align-items: flex-start; justify-content: center; padding: 0 4rem;">
+        <div class="row" style="margin-bottom: 4rem;">
+          <div class="col">
+            <div class="pipe-step">
+              <span class="pipe-label mono">INGEST</span>
+              <p class="pipe-desc">Census · OSM · FEMA · EPA</p>
+            </div>
+            <div class="pipe-step">
+              <span class="pipe-label mono">SCORE</span>
+              <p class="pipe-desc">6 factors · Inverted-U competition</p>
+            </div>
+          </div>
+          <div class="col">
+            <div class="pipe-step">
+              <span class="pipe-label mono">CLUSTER</span>
+              <p class="pipe-desc">H3 · DBSCAN · Getis-Ord Gi*</p>
+            </div>
+            <div class="pipe-step">
+              <span class="pipe-label mono">VISUALIZE</span>
+              <p class="pipe-desc">MapLibre + deck.gl · 20k hexes @ 60fps</p>
+            </div>
+          </div>
+        </div>
+        <div class="mono text-muted" style="font-size: 14px; text-align: center; width: 100%; border-top: 1px solid #333; padding-top: 2rem;">
+          All scoring precomputed. Live requests are PK lookups. p95 &lt; 300ms.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide" id="slide-5">
+      <div class="header">// LIVE_DEMO</div>
+      <div class="center-content">
+        <h1 class="text-cyan" style="font-size: 64px; font-weight: 700; margin-bottom: 1rem;">&rarr; SWITCH TO THE APP</h1>
+        <div class="mono text-muted" style="font-size: 16px;">3 demo pins ready. Austin, TX. No Wi-Fi needed.</div>
+      </div>
+    </div>
+
+    <!-- Slide 6 -->
+    <div class="slide" id="slide-6">
+      <div class="header">// WHY_THIS_WINS</div>
+      <div class="center-content" style="align-items: flex-start; padding: 0 4rem;">
+        <div style="width: 100%;">
+          <div class="bullet-row">
+            <div class="bullet-label mono">[ EXPLAINABLE ]</div>
+            <div class="bullet-text">Every number is traceable to a source layer.</div>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label mono">[ STATISTICAL ]</div>
+            <div class="bullet-text">Getis-Ord Gi* — hotspots that are real, not eyeballed.</div>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label mono">[ CONFIGURABLE ]</div>
+            <div class="bullet-text">Switch retail &rarr; warehouse. Same city, different answer.</div>
+          </div>
+          <div class="bullet-row">
+            <div class="bullet-label mono">[ OFFLINE-FIRST ]</div>
+            <div class="bullet-text">Runs entirely in Docker. Zero external API calls at demo time.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 7 -->
+    <div class="slide" id="slide-7">
+      <div class="header">// THANK_YOU</div>
+      <div class="center-content">
+        <h1 class="text-green" style="font-size: 48px; font-weight: 700; margin-bottom: 1rem;">18,000 hexagons. One decision.</h1>
+        <div class="mono text-muted" style="font-size: 20px; margin-bottom: 4rem;">Site Readiness Analyzer // Austin, TX</div>
+        <div class="mono text-muted" style="font-size: 12px; border: 1px solid #333; padding: 1rem; border-radius: 4px;">
+          <div style="color: var(--white); margin-bottom: 0.5rem;">github.com/Kashyap1008/TerraScore</div>
+          <div>Kashyap · Megh · Rudra · Aary</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="counter">01 / 07</span>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('counter');
+    let currentSlide = 0;
+
+    function updateSlide() {
+      slides.forEach((s, i) => {
+        if (i === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      counter.textContent = `0${currentSlide + 1} / 0${slides.length}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {});
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>
