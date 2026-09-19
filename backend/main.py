@@ -1,6 +1,7 @@
 import os
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Dict, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 redis_client = None
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     global redis_client
     
     # Check DB
@@ -72,7 +73,7 @@ os.makedirs(settings.static_dir, exist_ok=True)
 app.mount("/static", StaticFiles(directory=settings.static_dir), name="static")
 
 @app.get("/healthz")
-async def health_check():
+async def health_check() -> Dict[str, Any]:
     return {
         "status": "ok",
         "db": app.state.db_ok,
@@ -81,7 +82,7 @@ async def health_check():
     }
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, str]:
     return {
         "service": "site-readiness",
         "docs": "/docs"

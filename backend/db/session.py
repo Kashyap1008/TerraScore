@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
+from typing import Generator
 from core.config import settings
 
 engine = create_engine(
@@ -11,7 +12,7 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
