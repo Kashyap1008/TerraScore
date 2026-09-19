@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 export default function CompareTray() {
@@ -16,7 +15,7 @@ export default function CompareTray() {
             </span>
             <button 
               onClick={() => removeFromCompare(idx)}
-              className="text-neonMagenta hover:text-white font-mono"
+              className="text-neonMagenta hover:text-white font-mono cursor-pointer"
             >
               ×
             </button>
@@ -29,7 +28,7 @@ export default function CompareTray() {
         onClick={() => console.log('Compare payload', compareList)}
         className={`font-mono text-xs uppercase px-4 py-2 rounded-sm border transition-colors
           ${compareList.length >= 2 
-            ? 'border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black' 
+            ? 'border-neonGreen text-neonGreen hover:bg-neonGreen hover:text-black cursor-pointer' 
             : 'border-panelEdge text-textMuted cursor-not-allowed'}`}
       >
         COMPARE

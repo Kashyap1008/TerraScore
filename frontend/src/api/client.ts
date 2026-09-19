@@ -12,7 +12,7 @@ export async function fetchScore(lat: number, lon: number, preset: PresetName, w
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lat, lon, preset, weights })
   });
-  return res.json();
+  return res.json() as Promise<ScoreResponse>;
 }
 
 export async function fetchLayers(): Promise<LayerMeta[]> {
@@ -20,18 +20,18 @@ export async function fetchLayers(): Promise<LayerMeta[]> {
     return new Promise(resolve => setTimeout(() => resolve([]), 200));
   }
   const res = await fetch('/api/v1/layers');
-  return res.json();
+  return res.json() as Promise<LayerMeta[]>;
 }
 
-export async function fetchHotspots(preset: PresetName, type: 'hot' | 'cold') {
+export async function fetchHotspots(preset: PresetName, type: 'hot' | 'cold'): Promise<unknown> {
   if (USE_MOCK) {
     return new Promise(resolve => setTimeout(() => resolve({}), 200));
   }
   const res = await fetch(`/api/v1/hotspots?preset=${preset}&type=${type}`);
-  return res.json();
+  return res.json() as Promise<unknown>;
 }
 
-export async function fetchIsochrone(lat: number, lon: number) {
+export async function fetchIsochrone(lat: number, lon: number): Promise<unknown> {
   if (USE_MOCK) {
     return new Promise(resolve => setTimeout(() => resolve({}), 200));
   }
@@ -40,5 +40,5 @@ export async function fetchIsochrone(lat: number, lon: number) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lat, lon })
   });
-  return res.json();
+  return res.json() as Promise<unknown>;
 }

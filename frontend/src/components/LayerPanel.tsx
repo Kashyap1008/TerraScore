@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 const LAYERS = [
@@ -14,7 +14,7 @@ export default function LayerPanel() {
   const [opacity, setOpacity] = useState(80);
 
   return (
-    <div className="absolute top-20 left-4 w-64 z-20 bg-panel/85 backdrop-blur border border-panelEdge rounded-sm shadow-neon-cyan">
+    <div className="absolute top-20 left-4 w-64 z-20 bg-panel/85 backdrop-blur border border-panelEdge rounded-sm shadow-neon-cyan select-none">
       <div className="font-mono text-textMuted text-[10px] uppercase tracking-widest border-b border-panelEdge px-3 py-2">
         // DATA_LAYERS
       </div>
@@ -25,7 +25,7 @@ export default function LayerPanel() {
             <button 
               key={layer.id} 
               onClick={() => toggleLayer(layer.id)}
-              className="flex items-center gap-2 text-left"
+              className="flex items-center gap-2 text-left cursor-pointer"
             >
               <span className="font-mono text-neonGreen text-xs w-6">
                 {isActive ? '[x]' : '[ ]'}
@@ -46,7 +46,7 @@ export default function LayerPanel() {
           min="0" max="100" 
           value={opacity}
           onChange={e => setOpacity(parseInt(e.target.value))}
-          className="w-full accent-[#CCFF00]"
+          className="w-full accent-[#CCFF00] cursor-pointer"
         />
       </div>
     </div>

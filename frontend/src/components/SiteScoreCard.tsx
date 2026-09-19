@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { fetchScore } from '../api/client';
 import type { ScoreResponse } from '../api/types';
@@ -9,7 +9,7 @@ export default function SiteScoreCard() {
 
   useEffect(() => {
     if (selectedSite) {
-      fetchScore(selectedSite.lat, selectedSite.lon, preset).then(data => {
+      fetchScore(selectedSite.lat, selectedSite.lon, preset).then((data) => {
         setScoreData(data);
       });
     } else {
@@ -37,7 +37,7 @@ export default function SiteScoreCard() {
         </div>
 
         <div className="space-y-4">
-          {scoreData.factors.map(f => {
+          {scoreData.factors.map((f) => {
             const width = Math.min(100, Math.max(0, f.raw * 100));
             const barColor = f.raw >= 0.7 ? 'bg-neonGreen' : f.raw >= 0.4 ? 'bg-neonCyan' : 'bg-neonMagenta';
             

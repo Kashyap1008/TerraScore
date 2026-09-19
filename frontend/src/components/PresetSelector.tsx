@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAppStore } from '../store/useAppStore';
 
 export default function PresetSelector() {
@@ -8,8 +7,8 @@ export default function PresetSelector() {
       <span className="text-textMuted font-mono text-xs">&gt; PRESET:</span>
       <select 
         value={preset} 
-        onChange={(e) => setPreset(e.target.value as 'retail'|'warehouse'|'ev')}
-        className="bg-panel border border-panelEdge text-neonCyan font-mono text-xs uppercase px-3 py-1.5 outline-none"
+        onChange={(e) => setPreset(e.target.value as 'retail' | 'warehouse' | 'ev')}
+        className="bg-panel border border-panelEdge text-neonCyan font-mono text-xs uppercase px-3 py-1.5 outline-none cursor-pointer"
       >
         <option value="retail">RETAIL_STORE</option>
         <option value="warehouse">WAREHOUSE</option>
