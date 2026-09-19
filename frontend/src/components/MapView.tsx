@@ -182,6 +182,8 @@ export default function MapView(props: MapViewProps) {
   }, [drawing, drawVertices]);
 
   // Handle map clicks (normal or drawing vertices)
+  const handleCoordClickRef = useRef<(lat: number, lon: number) => void>(() => {});
+
   const handleCoordClick = (lat: number, lon: number) => {
     if (drawingRef.current) {
       const next: [number, number][] = [...drawVerticesRef.current, [lon, lat]];
@@ -202,6 +204,9 @@ export default function MapView(props: MapViewProps) {
       onMapClickRef.current(lat, lon);
     }
   };
+  useEffect(() => {
+    handleCoordClickRef.current = handleCoordClick;
+  });
 
   // Check PMTiles manifest & load fallback datasets on mount
   useEffect(() => {
@@ -361,7 +366,7 @@ export default function MapView(props: MapViewProps) {
     });
 
     map.on('click', (e: maplibregl.MapLayerMouseEvent) => {
-      handleCoordClick(e.lngLat.lat, e.lngLat.lng);
+      handleCoordClickRef.current(e.lngLat.lat, e.lngLat.lng);
     });
 
     map.on('error', (e) => {

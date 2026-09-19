@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 
+const BOOT_LINES = [
+  "> initializing geospatial engine...",
+  "> loading H3 grid [austin, tx]...",
+  "> compiling spatial indexes...",
+  "> connecting to routing service...",
+  "> READY."
+];
+
 export default function TerminalBoot({ onComplete }: { onComplete: () => void }) {
-  const lines = [
-    "> initializing geospatial engine...",
-    "> loading H3 grid [austin, tx]...",
-    "> compiling spatial indexes...",
-    "> connecting to routing service...",
-    "> READY."
-  ];
   
   const [displayedLines, setDisplayedLines] = useState<string[]>([]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
@@ -15,12 +16,12 @@ export default function TerminalBoot({ onComplete }: { onComplete: () => void })
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (currentLineIndex >= lines.length) {
+    if (currentLineIndex >= BOOT_LINES.length) {
       setTimeout(() => onComplete(), 400);
       return;
     }
 
-    const targetLine = lines[currentLineIndex];
+    const targetLine = BOOT_LINES[currentLineIndex];
     if (currentCharIndex < targetLine.length) {
       const timer = setTimeout(() => {
         setCurrentCharIndex(c => c + 1);
@@ -42,7 +43,7 @@ export default function TerminalBoot({ onComplete }: { onComplete: () => void })
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [currentLineIndex, currentCharIndex, lines, onComplete]);
+  }, [currentLineIndex, currentCharIndex, onComplete]);
 
   useEffect(() => {
     const timer = setInterval(() => {
