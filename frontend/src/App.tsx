@@ -74,7 +74,7 @@ export default function App() {
   // 3. SaaS Landing Page (Unauthenticated Entry Point)
   if (showLandingPage) {
     return (
-      <div className="relative w-screen h-screen overflow-y-auto bg-slate-950 font-sans">
+      <div className="relative w-screen h-screen overflow-y-auto bg-slate-50 font-sans">
         <LandingPage />
         <OnboardingWizard />
       </div>
