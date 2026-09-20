@@ -294,9 +294,6 @@ terraScorer/
 ├── Makefile                       # Top-level automation targets
 ├── docker-compose.yml             # Container orchestration (PostGIS, Redis, OSRM)
 ├── .env.example                   # Environment configuration template
-├── PRD.md                         # Product Requirements Document
-├── design.md                      # UI/UX & Design system specification
-├── tech.md                        # Architecture & interface contracts
 │
 ├── backend/                       # FastAPI REST API Backend
 │   ├── main.py                    # Application entry point, lifespan, & routing
