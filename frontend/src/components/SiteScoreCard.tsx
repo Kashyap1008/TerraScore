@@ -45,7 +45,12 @@ export default function SiteScoreCard() {
             if (metrics) {
               newScoreData.factors = base.factors.map((f) => {
                 const metricVal = metrics[f.key];
-                return metricVal !== undefined ? { ...f, raw: metricVal / 100 } : f;
+                const userWeight = weights[f.key] !== undefined ? weights[f.key] : f.weight;
+                return { 
+                  ...f, 
+                  raw: metricVal !== undefined ? metricVal / 100 : f.raw,
+                  weight: userWeight
+                };
               });
             }
             setScoreData(newScoreData);

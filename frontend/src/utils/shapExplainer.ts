@@ -25,13 +25,18 @@ const METRO_BASELINE_SCORE = 52.5;
 export function computeShapExplainer(
   score: number,
   preset: string,
-  factors: { key: string; label: string; raw: number; contribution?: number; explanation?: string }[]
+  factors: { key: string; label: string; raw: number; weight?: number; contribution?: number; explanation?: string }[]
 ): ShapReport {
   const baseValue = METRO_BASELINE_SCORE;
   const netDelta = Math.round((score - baseValue) * 10) / 10;
 
   // Expected baseline factor raw average is ~0.50
-  let preliminaryPoints = factors.map((f) => (f.raw - 0.50) * 36);
+  // We scale the preliminary points by the custom weight.
+  // 0.2 is the baseline uniform weight for 5 factors (0.2 * 180 = 36).
+  let preliminaryPoints = factors.map((f) => {
+    const w = f.weight !== undefined ? f.weight : 0.2;
+    return (f.raw - 0.50) * (w * 180);
+  });
   
   const sumPoints = preliminaryPoints.reduce((acc, p) => acc + p, 0);
   const diff = netDelta - sumPoints;
@@ -95,7 +100,7 @@ export function computeShapExplainer(
       key: f.key,
       label: f.label,
       rawValue: f.raw,
-      weight: 0.2,
+      weight: f.weight !== undefined ? f.weight : 0.2,
       contributionPoints: points,
       isPositive: isPos,
       impactLevel,
