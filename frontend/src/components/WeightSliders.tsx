@@ -37,7 +37,7 @@ export default function WeightSliders({
       </div>
       <div className="space-y-2">
         {Object.entries(localWeights).map(([key, val]) => (
-          <div key={key} className="flex items-center gap-2">
+          <div key={key} className="flex items-center gap-2 shrink-0">
             <span className="font-mono uppercase text-[10px] text-textMuted w-24 truncate">{key}</span>
             <input 
               type="range" 

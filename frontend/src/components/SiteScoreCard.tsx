@@ -77,7 +77,7 @@ export default function SiteScoreCard() {
   if (!selectedSite || (!scoreData && !loading)) {
     return (
       <div className="absolute top-20 right-4 w-96 z-20">
-        <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-xl shadow-neon-green p-6 flex flex-col items-center justify-center h-32">
+        <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-xl shadow-neon-green p-6 w-96 flex flex-col max-h-[85vh] overflow-y-auto text-textMain">
           <span className="font-mono text-textMuted text-xs uppercase">// CLICK A HEXAGON TO ANALYZE</span>
         </div>
       </div>
@@ -88,18 +88,18 @@ export default function SiteScoreCard() {
 
   return (
     <>
-      <div className="absolute top-20 right-4 w-96 z-20 max-h-[calc(100vh-100px)] overflow-y-auto rounded-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-xl shadow-neon-green p-5 relative flex flex-col font-sans">
-          <div className="absolute -top-3 left-4 bg-neonGreen text-black font-mono text-[10px] px-2 py-0.5 rounded-xs font-bold">
-            // SITE_ANALYSIS
-          </div>
+      <div className="absolute top-20 right-4 w-96 z-20">
+        <div className="absolute -top-3 left-4 bg-neonGreen text-black font-mono text-[10px] px-2 py-0.5 rounded-xs font-bold z-30">
+          // SITE_ANALYSIS
+        </div>
+        <div className="bg-panel/85 backdrop-blur border border-panelEdge rounded-xl shadow-neon-green p-5 relative flex flex-col font-sans max-h-[calc(100vh-100px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
           {/* Location Title & Actions Bar */}
           <div className="mb-3 pb-3 border-b border-panelEdge flex items-start justify-between gap-2">
             <div className="flex items-start gap-1.5">
               <span className="text-neonGreen text-base leading-none mt-0.5">📍</span>
               <div>
-                <div className="text-white font-bold text-sm leading-snug">{locInfo.name}</div>
+                <div className="text-textMain font-bold text-sm leading-snug">{locInfo.name}</div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono mt-0.5">
                   <span className="text-neonCyan font-semibold">{locInfo.submarket}</span>
                   <span className="text-textMuted">•</span>
@@ -160,7 +160,7 @@ export default function SiteScoreCard() {
                   const barColor =
                     f.raw >= 0.7 ? 'bg-neonGreen' : f.raw >= 0.4 ? 'bg-neonCyan' : 'bg-neonMagenta';
                   return (
-                    <div key={f.key} className="flex items-center gap-3" title={f.explanation}>
+                    <div key={f.key} className="flex items-center gap-3 shrink-0" title={f.explanation}>
                       <span className="font-mono text-textMuted text-xs uppercase w-24 truncate">
                         {f.label}
                       </span>
@@ -170,7 +170,7 @@ export default function SiteScoreCard() {
                           style={{ width: `${width}%` }}
                         />
                       </div>
-                      <span className="font-mono text-white text-xs w-8 text-right">
+                      <span className="font-mono text-textMain font-semibold text-xs w-8 text-right">
                         {f.raw}
                       </span>
                     </div>
