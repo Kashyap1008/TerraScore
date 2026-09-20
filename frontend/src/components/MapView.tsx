@@ -647,6 +647,63 @@ export default function MapView(props: MapViewProps) {
       if (map.getLayer('pmtiles-h3-layer')) map.removeLayer('pmtiles-h3-layer');
     }
 
+    // PMTiles 3D Hex Grid
+    if (pmtilesAvailable && props.activeLayers.includes('3d_hex')) {
+      if (!map.getLayer('pmtiles-h3-3d-layer')) {
+        map.addLayer({
+          id: 'pmtiles-h3-3d-layer',
+          type: 'fill-extrusion',
+          source: 'pmtiles-h3',
+          'source-layer': 'h3_grid',
+          paint: {
+            'fill-extrusion-opacity': (layerOpacity?.['3d_hex'] ?? 0.70) * 0.9,
+            'fill-extrusion-color': [
+              'step',
+              ['coalesce', ['get', 'score_retail'], ['get', 'score'], 0],
+              '#EF4444',
+              40, '#F59E0B',
+              60, '#06B6D4',
+              80, '#10B981',
+            ],
+            'fill-extrusion-height': [
+              '*',
+              ['coalesce', ['get', 'score_retail'], ['get', 'score'], 0],
+              100 // score 0-100 * 100 = 0 - 10000 meters elevation
+            ],
+            'fill-extrusion-base': 0
+          },
+        });
+
+        map.on('mousemove', 'pmtiles-h3-3d-layer', (e) => {
+          if (e.features && e.features.length > 0) {
+            const f = e.features[0];
+            const hex = String(f.properties?.h3_index || f.properties?.h3 || '');
+            const score = Number(f.properties?.score_retail ?? f.properties?.score ?? 0);
+            const loc = resolveLocationName(e.lngLat.lat, e.lngLat.lng, hex);
+            setHoveredCell({
+              hex,
+              score: Math.round(score * 10) / 10,
+              x: e.point.x,
+              y: e.point.y,
+              locationName: loc.name,
+              submarket: loc.submarket,
+              coordsFormatted: loc.coordsFormatted,
+            });
+            map.getCanvas().style.cursor = 'pointer';
+          }
+        });
+
+        map.on('mouseleave', 'pmtiles-h3-3d-layer', () => {
+          setHoveredCell(null);
+          map.getCanvas().style.cursor = '';
+        });
+      } else {
+        map.setPaintProperty('pmtiles-h3-3d-layer', 'fill-extrusion-opacity', (layerOpacity?.['3d_hex'] ?? 0.70) * 0.9);
+      }
+    } else {
+      if (map.getLayer('pmtiles-h3-3d-layer')) map.removeLayer('pmtiles-h3-3d-layer');
+    }
+
     // PMTiles Hotspots Layer (filtered to hotspot cells with z > 1.96)
     if (pmtilesAvailable && props.activeLayers.includes('hotspots')) {
       if (!map.getLayer('pmtiles-hotspots-layer')) {
@@ -687,13 +744,21 @@ export default function MapView(props: MapViewProps) {
     }
 
     // Cleanup pmtiles source if neither layer is active
-    if (!pmtilesAvailable || (!props.activeLayers.includes('h3_grid') && !props.activeLayers.includes('hotspots'))) {
+    if (!pmtilesAvailable || (!props.activeLayers.includes('h3_grid') && !props.activeLayers.includes('3d_hex') && !props.activeLayers.includes('hotspots'))) {
       if (map.getSource('pmtiles-h3')) {
-        if (!map.getLayer('pmtiles-h3-layer') && !map.getLayer('pmtiles-hotspots-layer')) {
+        if (!map.getLayer('pmtiles-h3-layer') && !map.getLayer('pmtiles-h3-3d-layer') && !map.getLayer('pmtiles-hotspots-layer')) {
           map.removeSource('pmtiles-h3');
         }
       }
     }
+    
+    // Tilt effect when 3D hex layer is active
+    if (props.activeLayers.includes('3d_hex')) {
+      if (map.getPitch() === 0) {
+        map.easeTo({ pitch: 45, duration: 1000 });
+      }
+    }
+
   }, [props.activeLayers, mapReady, pmtilesAvailable, pmtilesBaseUrl, layerOpacity, dynamicIsoGeoJSON]);
 
   const handleDeckClick = (info: unknown) => {
@@ -708,11 +773,12 @@ export default function MapView(props: MapViewProps) {
     const layers = [];
 
     // 1. H3 Hex Score layer (rendered with semi-transparency so satellite imagery is clear)
-    if (!pmtilesAvailable && props.activeLayers.includes('h3_grid') && displayedHexFeatures.length > 0) {
+    if (!pmtilesAvailable && (props.activeLayers.includes('h3_grid') || props.activeLayers.includes('3d_hex')) && displayedHexFeatures.length > 0) {
       layers.push(
         createHexLayer({
           data: { type: 'FeatureCollection', features: displayedHexFeatures },
-          opacity: layerOpacity?.h3_grid ?? 0.50,
+          opacity: props.activeLayers.includes('3d_hex') ? (layerOpacity?.['3d_hex'] ?? 0.70) : (layerOpacity?.h3_grid ?? 0.50),
+          is3D: props.activeLayers.includes('3d_hex'),
           onHover: (info: unknown) => {
             const pickInfo = info as { object?: GeoJSON.Feature; coordinate?: [number, number]; x?: number; y?: number };
             if (pickInfo.object?.properties) {

@@ -3,6 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 
 const LAYERS = [
   { id: 'h3_grid', label: 'SITE_SCORES' },
+  { id: '3d_hex', label: '3D_HEX_MAP' },
   { id: 'roads', label: 'ROAD_NETWORK' },
   { id: 'flood_zones', label: 'FLOOD_ZONES' },
   { id: 'pois', label: 'COMPETITORS' },
