@@ -29,11 +29,36 @@ export default function SiteScoreCard() {
     if (selectedSite) {
       setLoading(true);
       const timer = setTimeout(() => {
-        fetchScore(selectedSite.lat, selectedSite.lon, preset, weights).then((data) => {
-          setScoreData(data);
-          setSelectedSiteScoreData(data);
-          setLoading(false);
-        });
+        if (selectedSite.cellData) {
+          // Unify data source: use the hovered cell's exact static data to build the ScoreResponse
+          // so the tooltip and the right panel display the exact same numbers.
+          import('../api/mockData').then(({ MOCK_SCORE_RESPONSE }) => {
+            const base = MOCK_SCORE_RESPONSE;
+            const score = selectedSite.cellData.score;
+            const metrics = selectedSite.cellData.metrics;
+            const newScoreData: ScoreResponse = {
+              ...base,
+              h3: selectedSite.cellData.hex,
+              score: score,
+              grade: score >= 80 ? 'A' : score >= 60 ? 'B' : score >= 40 ? 'C' : 'D',
+            };
+            if (metrics) {
+              newScoreData.factors = base.factors.map((f) => {
+                const metricVal = metrics[f.key];
+                return metricVal !== undefined ? { ...f, raw: metricVal / 100 } : f;
+              });
+            }
+            setScoreData(newScoreData);
+            setSelectedSiteScoreData(newScoreData);
+            setLoading(false);
+          });
+        } else {
+          fetchScore(selectedSite.lat, selectedSite.lon, preset, weights).then((data) => {
+            setScoreData(data);
+            setSelectedSiteScoreData(data);
+            setLoading(false);
+          });
+        }
       }, 300);
       return () => clearTimeout(timer);
     } else {

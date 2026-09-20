@@ -40,7 +40,7 @@ export interface AppState {
   // Preset & Map Explorer State
   preset: 'retail' | 'warehouse' | 'ev';
   activeLayers: string[];
-  selectedSite: { lat: number; lon: number } | null;
+  selectedSite: { lat: number; lon: number; cellData?: any } | null;
   selectedSiteScoreData: ScoreResponse | null;
   compareList: { lat: number; lon: number }[];
   weights: Record<string, number>;

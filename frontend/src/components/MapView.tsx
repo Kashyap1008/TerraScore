@@ -19,7 +19,7 @@ import * as h3 from 'h3-js';
 
 export interface MapViewProps {
   activeLayers: string[];
-  onMapClick: (lat: number, lon: number) => void;
+  onMapClick: (lat: number, lon: number, cellData?: any) => void;
   onPolygonDraw: (geojson: GeoJSON.Polygon) => void;
   candidatePins: { lat: number; lon: number }[];
 }
@@ -198,7 +198,7 @@ export default function MapView(props: MapViewProps) {
   }, [drawing, drawVertices]);
 
   // Handle map clicks (normal mode only — drawing is now freehand lasso)
-  const handleCoordClickRef = useRef<(lat: number, lon: number) => void>(() => {});
+  const handleCoordClickRef = useRef<(lat: number, lon: number, cellData?: any) => void>(() => {});
 
   const hoveredCellRef = useRef<HoveredCellInfo | null>(null);
   useEffect(() => {
@@ -210,7 +210,7 @@ export default function MapView(props: MapViewProps) {
       if (hoveredCellRef.current) {
         // Snap the click to the exact center of the hovered hex to ensure uniform data aggregation
         const [centerLat, centerLon] = h3.cellToLatLng(hoveredCellRef.current.hex);
-        onMapClickRef.current(centerLat, centerLon);
+        onMapClickRef.current(centerLat, centerLon, hoveredCellRef.current);
       } else {
         onMapClickRef.current(lat, lon);
       }

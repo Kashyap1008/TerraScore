@@ -140,7 +140,7 @@ export default function App() {
           <div className="absolute inset-0 z-0">
             <MapView
               activeLayers={activeLayers}
-              onMapClick={(lat, lon) => setSelectedSite({ lat, lon })}
+              onMapClick={(lat, lon, cellData) => setSelectedSite({ lat, lon, cellData })}
               onPolygonDraw={(g) => setDrawnPolygon(g as GeoJSON.Polygon)}
               candidatePins={compareList}
             />
