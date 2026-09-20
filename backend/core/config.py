@@ -2,13 +2,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Tuple
 
 class Settings(BaseSettings):
-    db_url: str
-    redis_url: str
-    osrm_url: str
-    metro_name: str
-    metro_bbox: str
-    utm_epsg: int
-    h3_resolution: int
+    db_url: str = "postgresql+psycopg://geo:geo@localhost:5432/sitereadiness"
+    redis_url: str = "redis://localhost:6379/0"
+    osrm_url: str = "http://localhost:5000"
+    metro_name: str = "Austin, TX"
+    metro_bbox: str = "-98.05,30.10,-97.55,30.55"
+    utm_epsg: int = 32614
+    h3_resolution: int = 9
     api_version: str = "0.1.0"
     static_dir: str = "static"
     presets_path: str = "config/presets.json"

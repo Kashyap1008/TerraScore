@@ -18,6 +18,7 @@ export default function SiteScoreCard() {
     toggleLayer,
     activeLayers,
     setBookmarkModalSite,
+    setSelectedSiteScoreData,
   } = useAppStore();
 
   const [scoreData, setScoreData] = useState<ScoreResponse | null>(null);
@@ -30,14 +31,16 @@ export default function SiteScoreCard() {
       const timer = setTimeout(() => {
         fetchScore(selectedSite.lat, selectedSite.lon, preset, weights).then((data) => {
           setScoreData(data);
+          setSelectedSiteScoreData(data);
           setLoading(false);
         });
       }, 300);
       return () => clearTimeout(timer);
     } else {
       setScoreData(null);
+      setSelectedSiteScoreData(null);
     }
-  }, [selectedSite, preset, weights]);
+  }, [selectedSite, preset, weights, setSelectedSiteScoreData]);
 
   if (!selectedSite || (!scoreData && !loading)) {
     return (

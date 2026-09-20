@@ -2,8 +2,8 @@ import hashlib
 from typing import Dict, Any
 
 def generate_mock_cell(lat: float, lon: float, h3_idx: str) -> Dict[str, Any]:
-    # Deterministic pseudo-random based on lat/lon
-    seed_str = f"{round(lat, 5)}_{round(lon, 5)}"
+    # Deterministic pseudo-random based on h3_idx so all points in a hex share the same mock data
+    seed_str = h3_idx
     hash_val = int(hashlib.md5(seed_str.encode()).hexdigest()[:8], 16)
     
     def r(offset: int) -> float:

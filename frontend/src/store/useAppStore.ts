@@ -13,6 +13,7 @@ import {
   loadSavedComparisons,
   saveSavedComparisons,
 } from '../utils/storage';
+import type { ScoreResponse } from '../api/types';
 
 export const WEIGHTS_BY_PRESET = {
   retail: { demand: 0.30, accessibility: 0.15, competition: 0.20, complementarity: 0.20, landuse: 0.10, risk: 0.05 },
@@ -40,6 +41,7 @@ export interface AppState {
   preset: 'retail' | 'warehouse' | 'ev';
   activeLayers: string[];
   selectedSite: { lat: number; lon: number } | null;
+  selectedSiteScoreData: ScoreResponse | null;
   compareList: { lat: number; lon: number }[];
   weights: Record<string, number>;
   layerOpacity: Record<string, number>;
@@ -60,6 +62,7 @@ export interface AppState {
   setPreset: (p: AppState['preset']) => void;
   toggleLayer: (id: string) => void;
   setSelectedSite: (s: AppState['selectedSite']) => void;
+  setSelectedSiteScoreData: (data: ScoreResponse | null) => void;
   addToCompare: (s: { lat: number; lon: number }) => void;
   removeFromCompare: (i: number) => void;
   clearCompare: () => void;
@@ -124,6 +127,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   preset: 'retail',
   activeLayers: ['h3_grid', 'roads'],
   selectedSite: null,
+  selectedSiteScoreData: null,
   compareList: [],
   weights: WEIGHTS_BY_PRESET.retail,
   layerOpacity: { h3_grid: 0.50, roads: 0.6, flood_zones: 0.35, pois: 1.0, transit_stops: 1.0, hotspots: 1.0, isochrone: 1.0 },
@@ -145,7 +149,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       ? state.activeLayers.filter(l => l !== id)
       : [...state.activeLayers, id]
   })),
-  setSelectedSite: (site) => set({ selectedSite: site }),
+  setSelectedSite: (site) => set({ selectedSite: site, selectedSiteScoreData: null }),
+  setSelectedSiteScoreData: (data) => set({ selectedSiteScoreData: data }),
   addToCompare: (site) => set((state) => {
     if (state.compareList.length >= 4) return state;
     return { compareList: [...state.compareList, site] };

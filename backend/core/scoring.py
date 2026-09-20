@@ -6,6 +6,8 @@ from core.config import settings
 from core.explanations import build_explanation
 
 def latlng_to_h3(lat: float, lon: float, res: int = 9) -> str:
+    if hasattr(h3, 'latlng_to_cell'):
+        return h3.latlng_to_cell(lat, lon, res)
     return h3.geo_to_h3(lat, lon, res)
 
 def load_preset(name: str) -> dict:

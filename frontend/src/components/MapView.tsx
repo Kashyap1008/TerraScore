@@ -15,6 +15,7 @@ import DrawTool from './DrawTool';
 import { useAppStore } from '../store/useAppStore';
 import { AUSTIN_AREAS, type AustinArea } from '../config/austinAreas';
 import { resolveLocationName } from '../utils/locationResolver';
+import * as h3 from 'h3-js';
 
 export interface MapViewProps {
   activeLayers: string[];
@@ -158,6 +159,7 @@ export default function MapView(props: MapViewProps) {
     drawnPolygon,
     setDrawnPolygon,
     selectedSite,
+    selectedSiteScoreData,
     isochroneData,
     flyTo,
   } = useAppStore();
@@ -198,9 +200,20 @@ export default function MapView(props: MapViewProps) {
   // Handle map clicks (normal mode only — drawing is now freehand lasso)
   const handleCoordClickRef = useRef<(lat: number, lon: number) => void>(() => {});
 
+  const hoveredCellRef = useRef<HoveredCellInfo | null>(null);
+  useEffect(() => {
+    hoveredCellRef.current = hoveredCell;
+  }, [hoveredCell]);
+
   const handleCoordClick = (lat: number, lon: number) => {
     if (!drawingRef.current) {
-      onMapClickRef.current(lat, lon);
+      if (hoveredCellRef.current) {
+        // Snap the click to the exact center of the hovered hex to ensure uniform data aggregation
+        const [centerLat, centerLon] = h3.cellToLatLng(hoveredCellRef.current.hex);
+        onMapClickRef.current(centerLat, centerLon);
+      } else {
+        onMapClickRef.current(lat, lon);
+      }
     }
     // In drawing mode clicks are ignored — freehand drag is used instead
   };
@@ -954,18 +967,23 @@ export default function MapView(props: MapViewProps) {
       </div>
 
       {/* Hover tooltip with human-readable location name */}
-      {hoveredCell && (
+      {hoveredCell && (() => {
+        const isHoveredSelected = selectedSite && h3.latLngToCell(selectedSite.lat, selectedSite.lon, h3.getResolution(hoveredCell.hex)) === hoveredCell.hex;
+        const isLoadingScore = isHoveredSelected && !selectedSiteScoreData;
+        const displayScore = (isHoveredSelected && selectedSiteScoreData) ? selectedSiteScoreData.score : hoveredCell.score;
+        return (
         <div
           className="absolute pointer-events-none z-[10] bg-white/95 backdrop-blur-md border border-slate-200 px-3.5 py-2.5 rounded-xl shadow-2xl font-mono text-slate-800 text-xs space-y-1.5 border-l-4 min-w-[220px]"
           style={{
             left: `${hoveredCell.x + 14}px`,
             top: `${hoveredCell.y + 14}px`,
-            borderLeftColor:
-              hoveredCell.score >= 80
+            borderLeftColor: isLoadingScore
+              ? '#94A3B8'
+              : displayScore >= 80
                 ? '#10B981'
-                : hoveredCell.score >= 60
+                : displayScore >= 60
                 ? '#06B6D4'
-                : hoveredCell.score >= 40
+                : displayScore >= 40
                 ? '#F59E0B'
                 : '#EF4444',
           }}
@@ -988,21 +1006,27 @@ export default function MapView(props: MapViewProps) {
             <span
               className="font-extrabold text-sm font-sans"
               style={{
-                color:
-                  hoveredCell.score >= 80
+                color: isLoadingScore
+                  ? '#94A3B8'
+                  : displayScore >= 80
                     ? '#059669'
-                    : hoveredCell.score >= 60
+                    : displayScore >= 60
                     ? '#0284C7'
-                    : hoveredCell.score >= 40
+                    : displayScore >= 40
                     ? '#D97706'
                     : '#DC2626',
               }}
             >
-              {hoveredCell.score} <span className="text-[10px] text-slate-400 font-normal">/ 100</span>
+              {isLoadingScore ? (
+                <span className="animate-pulse tracking-widest leading-none">...</span>
+              ) : (
+                <>{displayScore} <span className="text-[10px] text-slate-400 font-normal">/ 100</span></>
+              )}
             </span>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Score legend */}
       <div className="absolute bottom-6 right-6 z-[10] bg-white/90 backdrop-blur border border-slate-200 px-3.5 py-2.5 rounded-lg shadow-lg font-mono text-[11px] select-none text-slate-700">

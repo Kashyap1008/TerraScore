@@ -44,6 +44,7 @@ async def get_score(req: ScoreRequest, request: Request) -> Dict[str, Any]:
     cell["worst_decile_threshold"] = aqi
 
     result = compute_score(cell, preset, req.weights)
+    result["h3"] = h3_idx
     return result
 
 class BatchScoreRequest(BaseModel):
