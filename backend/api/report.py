@@ -137,6 +137,11 @@ async def get_report(h3_index: str, request: Request, preset: str = "retail"):
         <div class="footer">
             Site Readiness Analyzer // Austin, TX // {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         </div>
+        <script>
+            window.onload = function() {
+                setTimeout(function() { window.print(); }, 500);
+            };
+        </script>
     </body>
     </html>
     """
