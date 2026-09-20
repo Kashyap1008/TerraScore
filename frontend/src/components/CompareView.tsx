@@ -20,7 +20,7 @@ export default function CompareView() {
   } = useAppStore();
 
   const [data, setData] = useState<(ScoreResponse | null)[]>([]);
-  const [deckTitle, setDeckTitle] = useState('Austin Q3 Retail Site Benchmark');
+  const deckTitle = 'Austin Q3 Retail Site Benchmark';
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function CompareView() {
         })
         .catch(() => {});
     } else {
-      setData([]);
+      Promise.resolve().then(() => setData([]));
     }
   }, [compareList, preset, weights]);
 

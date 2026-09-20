@@ -14,7 +14,7 @@ export default function ProfileSettings() {
   const [name, setName] = useState(currentUser?.name || '');
   const [organization, setOrganization] = useState(currentUser?.organization || '');
   const [role, setRole] = useState(currentUser?.role || '');
-  const [targetMetro, setTargetMetro] = useState(currentUser?.targetMetro || 'Austin, TX');
+  const targetMetro = currentUser?.targetMetro || 'Austin, TX';
   const [defaultPreset, setDefaultPreset] = useState(currentUser?.defaultPreset || 'retail');
   const [savedSuccess, setSavedSuccess] = useState(false);
 

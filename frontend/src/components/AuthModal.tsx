@@ -16,8 +16,8 @@ export default function AuthModal() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [organization, setOrganization] = useState('');
-  const [role, setRole] = useState('Director of Real Estate');
-  const [defaultPreset, setDefaultPreset] = useState<'retail' | 'warehouse' | 'ev'>('retail');
+  const role = 'Director of Real Estate';
+  const defaultPreset = 'retail' as 'retail' | 'warehouse' | 'ev';
 
   if (!isAuthModalOpen) return null;
 

@@ -9,7 +9,6 @@ export default function TopBar() {
     savedSites,
     currentUser,
     setAuthView,
-    setIsAuthModalOpen,
     setIsProfileModalOpen,
     setShowLandingPage,
   } = useAppStore();

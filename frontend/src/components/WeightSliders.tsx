@@ -12,7 +12,7 @@ export default function WeightSliders({
   const [localWeights, setLocalWeights] = useState(weights);
 
   useEffect(() => {
-    setLocalWeights(weights);
+    Promise.resolve().then(() => setLocalWeights(weights));
   }, [weights]);
 
   const handleChange = (key: string, val: number) => {

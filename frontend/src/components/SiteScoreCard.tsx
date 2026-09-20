@@ -27,7 +27,7 @@ export default function SiteScoreCard() {
 
   useEffect(() => {
     if (selectedSite) {
-      setLoading(true);
+      Promise.resolve().then(() => setLoading(true));
       const timer = setTimeout(() => {
         if (selectedSite.cellData) {
           // Unify data source: use the hovered cell's exact static data to build the ScoreResponse
@@ -62,8 +62,10 @@ export default function SiteScoreCard() {
       }, 300);
       return () => clearTimeout(timer);
     } else {
-      setScoreData(null);
-      setSelectedSiteScoreData(null);
+      Promise.resolve().then(() => {
+        setScoreData(null);
+        setSelectedSiteScoreData(null);
+      });
     }
   }, [selectedSite, preset, weights, setSelectedSiteScoreData]);
 
