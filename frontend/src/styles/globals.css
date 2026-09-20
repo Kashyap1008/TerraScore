@@ -4,12 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 body {
   background: #F8FAFC;
   color: #0F172A;
   font-family: 'Space Grotesk', sans-serif;
-  margin: 0;
-  overflow: hidden;
+  /* overflow is intentionally NOT set here.
+     The map app wrapper uses Tailwind overflow-hidden.
+     Auth/landing pages need free scroll. */
 }
 
 @keyframes grid-scroll {
